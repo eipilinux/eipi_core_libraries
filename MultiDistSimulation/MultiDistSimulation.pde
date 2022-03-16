@@ -106,7 +106,7 @@ void draw(){
     outputNeurons[i].display();
   }
 
-  strokeWeight(1);
+  strokeWeight(2);
 
   for(int i = 0; i < inputNeurons.length; i++){
     // if(inputNeuronsInputWeights[i] < 0){
