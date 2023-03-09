@@ -293,39 +293,7 @@ boolean test_everything(void){
     return result_of_tests;
 }
 
-
-
 int main(){
-    // bigint* zero = create_zero();
-    // char* printable = to_string(zero);
-    // printf("The zero number is: %s\n", printable);
-    // free(printable);
-    // destroy(zero);
-    // bigint* number = create_from_int(-102);
-    // char* numprintable = to_string(number);
-    // printf("The other number is: %s\nand data is: ", numprintable);
-    // for(int i = 0; i<number->num_of_digits; i++){
-    //     printf("%d", (int)number->data[i]);
-    // }
-    // printf("\n");
-    // bigint* second = create_from_int(12);
-    // char* printnum = to_string(second);
-    // bigint* added = create_zero();
-    // bigint_add(added, number, second);
-    // char* printnum2 = to_string(added);
-    // printf("%s plus %s is: %s\n", numprintable, printnum, printnum2);
-    // printf("compare(12, -102): %d\n", bigint_cmp(second, number));
-    // printf("abs_compare(12, -102): %d\n", bigint_cmp_abs(second, number));
-    // __obj_details(second, __LINE__, __FILE__);
-    // //CHECK(21+2==1);
-    // free(numprintable);
-    // free(printnum);
-    // free(printnum2);
-    // destroy(second);
-    // destroy(added);
-    // destroy(number);
-
     test_everything();
-
     return 0;
 }
