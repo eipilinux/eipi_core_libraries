@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
+// #include <string.h>
 //========================================================================================================================================================
 // perhaps the end goal could be to replicate an efficient version of the python standard library for C 
 //========================================================================================================================================================
@@ -81,7 +83,9 @@ void bigint_n_choose_k(bigint* result, bigint* n, bigint* k); /* result = n choo
 
 /* Special operators and comparison */
 int bigint_cmp(bigint* a, bigint* b);               	/* Compare: returns 1 if a > b, 0 if a == b, and -1 if a < b */
-int bigint_cmp_abs(bigint* a, bigint* b);               	/* Compare: returns 1 if abs(a) > abs(b), 0 if abs(a) == abs(b), and -1 if abs(a) < abs(b) */
+int bigint_cmp_abs(bigint* a, bigint* b);               /* Compare: returns 1 if abs(a) > abs(b), 0 if abs(a) == abs(b), and -1 if abs(a) < abs(b) */
+int int_cmp(bigint* a, int b);							/* Compare to int: returns 1 if a > b, 0 if a == b, -1 if a < b */
+int int_cmp_abs(bigint* a, int b);						/* Compare to int abs: returns 1 if abs(a) > abs(b), 0 if abs(a) == abs(b), and -1 if abs(a) < abs(b) */
 boolean bigint_is_zero(bigint* n);                      /* For comparison with zero this returns TRUE if n is 0 and FALSE otherwise */
 void bigint_inc(bigint* n);                             /* Increment: add one to n */
 void bigint_dec(bigint* n);                             /* Decrement: subtract one from n */
@@ -91,7 +95,9 @@ void bigint_copy(bigint* dst, bigint* src);        		/* Copy src into dst*/
 // Internal Library Functions
 //============================================================================
 
-boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed);	/* this makes sure there is enough allocated memory for the num_digits_needed*/
+boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed);	/* this makes sure there is enough allocated memory for the num_digits_needed */
 void __positive_difference(bigint* diff, bigint* a, bigint* b); /* this calculates abs(abs(a)-abs(b)) the positve difference between the two ie (20, -300) is 280 */
 void __obj_details(bigint* obj, int lineno, char* file); /* this is useful for debugging */
+int __strcmp(const char *s1, const char *s2);	/* this is just a copy of the standard string.h implementation of strcmp since that is one of the only function from that library that we utilize */
+size_t __strlen(const char *str);	/* this is just a copy of the standard string.h implementation of strlen since that is one of the only function from that library that we utilize */
 #endif

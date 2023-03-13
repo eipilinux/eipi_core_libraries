@@ -1,6 +1,6 @@
 #include "bigint.h"
 
-bigint* create_zero(void){
+bigint* create_zero(void){                      /* FIN */
     bigint* retval = malloc(sizeof(bigint));
     retval->num_of_digits = 1;
     retval->num_allocated = 2*retval->num_of_digits+1;
@@ -9,12 +9,16 @@ bigint* create_zero(void){
     retval->data[0] = 0;
     return retval;
 }
-bigint* create_one(void){
+bigint* create_one(void){                       /* FIN */
     bigint* retval = create_zero();
     retval->data[0] = 1;
     return retval;
 }
-bigint* create_from_int(int input){
+bigint* create_from_int(int input){             /* FIN */
+    if(input == 0)
+        return create_zero();
+    if(input == 1)
+        return create_one();
     int stepwise_remainder = abs(input), iter = 0;
     bigint* retval = malloc(sizeof(bigint));
     retval->sign = (input >= 0) ? POSITIVE : NEGATIVE;
@@ -29,23 +33,47 @@ bigint* create_from_int(int input){
     return retval;
 }
 bigint* create_from_string(char* input){
+    if(__strcmp(input,"0") == 0)
+        return create_zero();
+    if(__strcmp(input,"1") == 0)
+        return create_one();
     bigint* retval = malloc(sizeof(bigint));
     retval->sign = (input[0] == '-') ? NEGATIVE : POSITIVE;
+    retval->num_of_digits = (retval->sign == POSITIVE) ? __strlen(input) : __strlen(input) - 1;
+    retval->num_allocated = 2*retval->num_of_digits+1;
+    retval->data = malloc(retval->num_allocated*sizeof(byte));
+    int index_in_number = retval->num_of_digits - 1; //the most significant end of the number
+    int i = (retval->sign == POSITIVE) ? 0 : 1;
+    for(; i < __strlen(input); i++){
+        retval->data[index_in_number] = input[i];
+        index_in_number--;
+    }
     return retval;
 }
-int to_int(bigint* num){
-    return 1;
+int to_int(bigint* num){                        /* FIN */
+    if(num->num_of_digits > (unsigned int)log10((double)INT_MAX) + 1){
+        printf("Error number is out of range!\n");
+        return 0;
+    }
+    int return_int = 0;
+    for(int i = 0; i < num->num_of_digits; i++){
+        return_int += num->data[i] * (int)pow(10.0, (double)i);
+    }
+    return (num->sign == POSITIVE) ? return_int : -1*return_int;
 }
-char* to_string(bigint* num){
-    int strlength = num->num_of_digits + ((num->sign == POSITIVE) ? 0 : 1);
+char* to_string(bigint* num){                   /* FIN */
+    int strlength = num->num_of_digits + ((num->sign == POSITIVE) ? 0 : 1) + 1; //the +1 is for the terminating \0
     char* retstr = malloc(strlength);
     retstr[0] = (num->sign == POSITIVE) ? ' ' : '-';
     for(int i = 0; i < num->num_of_digits; i++){
-        retstr[strlength - i - 1] = (char)(48 + num->data[i]);
+        retstr[strlength - i - 2] = (char)(48 + num->data[i]);
     }
+    retstr[strlength - 1] = '\0';
     return retstr;
 }
-boolean destroy(bigint* num){
+boolean destroy(bigint* num){                   /* FIN */
+    if(!num)
+        return TRUE;
     if(num->num_allocated > 0)
         free(num->data);
     free(num);
@@ -122,7 +150,21 @@ int bigint_cmp_abs(bigint* a, bigint* b){
     }
     return 0;
 }
-boolean bigint_is_zero(bigint* n){
+int int_cmp(bigint* a, int b){
+    boolean sign_of_b = (b >= 0) ? POSITIVE : NEGATIVE;
+    if(sign_of_b == a->sign)
+        return (a->sign == POSITIVE) ? int_cmp_abs(a, b) : -1*int_cmp_abs(a, b);
+    return (a->sign == POSITIVE) ? 1 : -1;
+}
+int int_cmp_abs(bigint* a, int b){
+    int number_to_compare = abs(to_int(a));
+    if(number_to_compare == 0 && a->num_of_digits > 1)
+        return 1;
+    if(number_to_compare == b)
+        return 0;
+    return (number_to_compare > b) ? 1 : -1;
+}
+boolean bigint_is_zero(bigint* n){                 /* FIN */
     if(n->num_of_digits == 1 && n->data[0] == 0)
         return TRUE;
     return FALSE;
@@ -148,7 +190,7 @@ void bigint_dec(bigint* n){
 void bigint_copy(bigint* dst, bigint* src){
     bigint* retval;
 }
-boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){
+boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){       /* FIN */
     if(num->num_allocated >= num_digits_needed)
         return TRUE;
     byte* tmp = realloc(num->data, 2*num_digits_needed);
@@ -180,7 +222,6 @@ void __positive_difference(bigint* diff, bigint* a, bigint* b){
     }
     diff->sign = POSITIVE;
 }
-
 void __obj_details(bigint* obj, int lineno, char* file){
     printf("\nThe object at line number: "BOLDMAGENTA"%d"RESET" in file: "BOLDMAGENTA"%s\n"RESET, lineno, file);
     if(!obj){
@@ -191,11 +232,83 @@ void __obj_details(bigint* obj, int lineno, char* file){
         printf("    The object "BOLDCYAN"sign"RESET" is: "BOLDYELLOW"%s\n"RESET, (obj->sign > 0) ? "POSITIVE" : "NEGATIVE");
         printf("    The object "BOLDCYAN"num_of_digits"RESET" is: "BOLDYELLOW"%d\n"RESET, obj->num_of_digits);
         printf("    The object "BOLDCYAN"num_allocated"RESET" is: "BOLDYELLOW"%d\n"RESET, obj->num_allocated);
-        printf("    The object "BOLDCYAN"data"RESET" holds the values: "BOLDYELLOW);
+        printf("    The object "BOLDCYAN"data"RESET" holds the values (this is in reverse order): "BOLDYELLOW);
         for(int i = 0; i < obj->num_of_digits; i++){
             printf("%d ", obj->data[i]);
         }
         printf(RESET"\n");
     }
     printf("\n");
+}
+int __strcmp(const char *s1, const char *s2) {
+   while (*s1 != '\0' && *s2 != '\0'  && *s1 == *s2) {
+      s1++;
+      s2++;
+   }
+   return *s1 - *s2;
+}
+size_t __strlen(const char *str){
+  const char *char_ptr;
+  const unsigned long int *longword_ptr;
+  unsigned long int longword, himagic, lomagic;
+  /* Handle the first few characters by reading one character at a time.
+     Do this until CHAR_PTR is aligned on a longword boundary.  */
+  for (char_ptr = str; ((unsigned long int) char_ptr
+			& (sizeof (longword) - 1)) != 0;
+       ++char_ptr)
+    if (*char_ptr == '\0')
+      return char_ptr - str;
+  /* All these elucidatory comments refer to 4-byte longwords,
+     but the theory applies equally well to 8-byte longwords.  */
+  longword_ptr = (unsigned long int *) char_ptr;
+  /* Bits 31, 24, 16, and 8 of this number are zero.  Call these bits
+     the "holes."  Note that there is a hole just to the left of
+     each byte, with an extra at the end:
+     bits:  01111110 11111110 11111110 11111111
+     bytes: AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD
+     The 1-bits make sure that carries propagate to the next 0-bit.
+     The 0-bits provide holes for carries to fall into.  */
+  himagic = 0x80808080L;
+  lomagic = 0x01010101L;
+  if (sizeof (longword) > 4)
+    {
+      /* 64-bit version of the magic.  */
+      /* Do the shift in two steps to avoid a warning if long has 32 bits.  */
+      himagic = ((himagic << 16) << 16) | himagic;
+      lomagic = ((lomagic << 16) << 16) | lomagic;
+    }
+  if (sizeof (longword) > 8)
+    abort ();
+  /* Instead of the traditional loop which tests each character,
+     we will test a longword at a time.  The tricky part is testing
+     if *any of the four* bytes in the longword in question are zero.  */
+  for (;;)
+    {
+      longword = *longword_ptr++;
+      if (((longword - lomagic) & ~longword & himagic) != 0)
+	{
+	  /* Which of the bytes was the zero?  If none of them were, it was
+	     a misfire; continue the search.  */
+	  const char *cp = (const char *) (longword_ptr - 1);
+	  if (cp[0] == 0)
+	    return cp - str;
+	  if (cp[1] == 0)
+	    return cp - str + 1;
+	  if (cp[2] == 0)
+	    return cp - str + 2;
+	  if (cp[3] == 0)
+	    return cp - str + 3;
+	  if (sizeof (longword) > 4)
+	    {
+	      if (cp[4] == 0)
+		return cp - str + 4;
+	      if (cp[5] == 0)
+		return cp - str + 5;
+	      if (cp[6] == 0)
+		return cp - str + 6;
+	      if (cp[7] == 0)
+		return cp - str + 7;
+	    }
+	}
+    }
 }
