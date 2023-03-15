@@ -1,6 +1,6 @@
 #include "bigint.h"
 
-bigint* create_zero(void){                      /* FIN */
+bigint* create_zero(void){                              /* FIN */
     bigint* retval = malloc(sizeof(bigint));
     retval->num_of_digits = 1;
     retval->num_allocated = 2*retval->num_of_digits+1;
@@ -9,12 +9,12 @@ bigint* create_zero(void){                      /* FIN */
     retval->data[0] = 0;
     return retval;
 }
-bigint* create_one(void){                       /* FIN */
+bigint* create_one(void){                               /* FIN */
     bigint* retval = create_zero();
     retval->data[0] = 1;
     return retval;
 }
-bigint* create_from_int(int input){             /* FIN */
+bigint* create_from_int(int input){                     /* FIN */
     if(input == 0)
         return create_zero();
     if(input == 1)
@@ -22,7 +22,7 @@ bigint* create_from_int(int input){             /* FIN */
     int stepwise_remainder = abs(input), iter = 0;
     bigint* retval = malloc(sizeof(bigint));
     retval->sign = (input >= 0) ? POSITIVE : NEGATIVE;
-    retval->num_of_digits = (unsigned int)log10((double)stepwise_remainder) + 1;
+    retval->num_of_digits = __fast_int_log10(stepwise_remainder) + 1;//(unsigned int)log10((double)stepwise_remainder) + 1;
     retval->num_allocated = 2*retval->num_of_digits+1;
     retval->data = malloc(retval->num_allocated*sizeof(byte));
     do{
@@ -32,7 +32,7 @@ bigint* create_from_int(int input){             /* FIN */
     }while(stepwise_remainder > 0);
     return retval;
 }
-bigint* create_from_string(char* input){
+bigint* create_from_string(char* input){                /* FIN */
     if(__strcmp(input,"0") == 0)
         return create_zero();
     if(__strcmp(input,"1") == 0)
@@ -45,23 +45,23 @@ bigint* create_from_string(char* input){
     int index_in_number = retval->num_of_digits - 1; //the most significant end of the number
     int i = (retval->sign == POSITIVE) ? 0 : 1;
     for(; i < __strlen(input); i++){
-        retval->data[index_in_number] = input[i];
+        retval->data[index_in_number] = input[i]-48;
         index_in_number--;
     }
     return retval;
 }
-int to_int(bigint* num){                        /* FIN */
-    if(num->num_of_digits > (unsigned int)log10((double)INT_MAX) + 1){
+int to_int(bigint* num){                                /* FIN */
+    if(num->num_of_digits > 10){
         printf("Error number is out of range!\n");
         return 0;
     }
     int return_int = 0;
     for(int i = 0; i < num->num_of_digits; i++){
-        return_int += num->data[i] * (int)pow(10.0, (double)i);
+        return_int += num->data[i] * __fast_pow_10(i);//(int)pow(10.0, (double)i); //this is guaranteed to be less than 11 digits as max int is not that big
     }
     return (num->sign == POSITIVE) ? return_int : -1*return_int;
 }
-char* to_string(bigint* num){                   /* FIN */
+char* to_string(bigint* num){                           /* FIN */
     int strlength = num->num_of_digits + ((num->sign == POSITIVE) ? 0 : 1) + 1; //the +1 is for the terminating \0
     char* retstr = malloc(strlength);
     retstr[0] = (num->sign == POSITIVE) ? ' ' : '-';
@@ -71,7 +71,7 @@ char* to_string(bigint* num){                   /* FIN */
     retstr[strlength - 1] = '\0';
     return retstr;
 }
-boolean destroy(bigint* num){                   /* FIN */
+boolean destroy(bigint* num){                           /* FIN */
     if(!num)
         return TRUE;
     if(num->num_allocated > 0)
@@ -79,20 +79,31 @@ boolean destroy(bigint* num){                   /* FIN */
     free(num);
     return TRUE;
 }
-void bigint_add(bigint* result, bigint* a, bigint* b){
-    __internal_make_correct_digit_allocation(result, MAX(a->num_of_digits, b->num_of_digits) + 1);
-    byte carry_over = 0;
-    int i;
-    for(i = 0; i < MAX(a->num_of_digits, b->num_of_digits) + 1; i++){
-        result->data[i] = ((a->num_of_digits > i) ? a->data[i] : 0) + ((b->num_of_digits > i) ? b->data[i] : 0) + carry_over;
-        carry_over = (result->data[i] > 9) ? result->data[i] - 9 : 0;
-        result->data[i] %= 10;
+void bigint_add(bigint* result, bigint* a, bigint* b){  /* FIN */
+    if(a->sign == b->sign){
+        __add_abs(result, a, b);
+        result->sign = a->sign;
     }
-    result->num_of_digits = (result->data[i] > 0) ? i : i-1;
-    result->sign = a->sign;
+    else{
+        __positive_difference(result, a, b);    //this is effectively some kind of subtraction we just don't know what the final sign will be
+        result->sign = (bigint_cmp_abs(a, b) == 0) ? POSITIVE : (bigint_cmp_abs(a, b) > 0) ? a->sign : b->sign;  //figure out the dominant sign
+    }
 }
 void bigint_sub(bigint* result, bigint* a, bigint* b){
-
+    if(a->sign == b->sign){
+        if(a->sign == POSITIVE){    //if both are positive then it is just a vanilla subtraction of a-b
+            __positive_difference(result, a, b);
+            result->sign = (bigint_cmp_abs(a, b) == 0) ? POSITIVE : (bigint_cmp_abs(a, b) > 0) ? POSITIVE : NEGATIVE;  //figure out the sign of the number
+        }
+        else{   //if both are negative then we have (-a)-(-b) -> -1(a-b) thus we can just do regular subtraction and then change the sign
+            __positive_difference(result, a, b);
+            result->sign = (bigint_cmp_abs(a, b) == 0) ? POSITIVE : (bigint_cmp_abs(a, b) > 0) ? NEGATIVE : POSITIVE;  //figure out the sign of the number
+        }
+    }
+    else{
+        __add_abs(result, a, b); //this is effectively addition just with different signs
+        result->sign = a->sign; //since (+a) - (-b) is positive and (-a) - (+b) is negative
+    }
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){
     bigint* retval;
@@ -194,8 +205,7 @@ boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_nee
     if(num->num_allocated >= num_digits_needed)
         return TRUE;
     byte* tmp = realloc(num->data, 2*num_digits_needed);
-    if (tmp == NULL)
-    {
+    if (tmp == NULL){
         printf("allocation failed"); //i should really implement a better error function to report errors to a file
         return FALSE;
     }
@@ -203,22 +213,34 @@ boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_nee
     num->num_allocated = 2*num_digits_needed;
     return TRUE;
 }
+void __add_abs(bigint* sum, bigint* a, bigint* b){
+    int length = MAX(a->num_of_digits, b->num_of_digits);
+    __internal_make_correct_digit_allocation(sum, length + 1);
+    byte carry_over = 0;
+    for(int i = 0; i < length + 1; i++){
+        sum->data[i] = ((a->num_of_digits > i) ? a->data[i] : 0) + ((b->num_of_digits > i) ? b->data[i] : 0) + carry_over;
+        carry_over = (sum->data[i] > 9) ? sum->data[i] / 10 : 0;
+        sum->data[i] %= 10;
+    }
+    sum->num_of_digits = (sum->data[length] > 0) ? length+1 : length;
+    sum->sign = POSITIVE;
+}
 void __positive_difference(bigint* diff, bigint* a, bigint* b){
     bigint* larger;
     bigint* smaller;
     larger = (bigint_cmp_abs(a, b) > 0) ? a : b;
     smaller = (bigint_cmp_abs(a, b) > 0) ? b : a;
-    __internal_make_correct_digit_allocation(diff, MAX(larger->num_of_digits, smaller->num_of_digits));
+    int length = MAX(larger->num_of_digits, smaller->num_of_digits);
+    __internal_make_correct_digit_allocation(diff, length);
     byte borrow_over = 0;
-    int i;
     int tmp_plc_data = 0;
     diff->num_of_digits = 0;
-    for(i = 0; i < MAX(larger->num_of_digits, smaller->num_of_digits); i++){
+    for(int i = 0; i < length; i++){
         tmp_plc_data = (int)(((larger->num_of_digits > i) ? larger->data[i] : 0) - ((smaller->num_of_digits > i) ? smaller->data[i] : 0) - borrow_over);
         borrow_over = (tmp_plc_data < 0) ? 1 : 0;
         diff->data[i] = (tmp_plc_data < 0) ? tmp_plc_data+10 : tmp_plc_data;
         tmp_plc_data = 0;
-        diff->num_of_digits = (diff->data[i] > 0) ? i : diff->num_of_digits;
+        diff->num_of_digits = (diff->data[i] > 0) ? i+1 : diff->num_of_digits;
     }
     diff->sign = POSITIVE;
 }
@@ -229,6 +251,7 @@ void __obj_details(bigint* obj, int lineno, char* file){
     }
     else{
         printf("    The object pointer points to: "BOLDWHITE"%p\n"RESET, (void*)obj);
+        printf("    The object "BOLDCYAN"data pointer"RESET" points to: "BOLDWHITE"%p\n"RESET, (void*)obj->data);
         printf("    The object "BOLDCYAN"sign"RESET" is: "BOLDYELLOW"%s\n"RESET, (obj->sign > 0) ? "POSITIVE" : "NEGATIVE");
         printf("    The object "BOLDCYAN"num_of_digits"RESET" is: "BOLDYELLOW"%d\n"RESET, obj->num_of_digits);
         printf("    The object "BOLDCYAN"num_allocated"RESET" is: "BOLDYELLOW"%d\n"RESET, obj->num_allocated);
@@ -311,4 +334,19 @@ size_t __strlen(const char *str){
 	    }
 	}
     }
+}
+int __fast_int_log10(int input){
+    return (input >= 1000000000) ? 9 : (input >= 100000000) ? 8 : 
+        (input >= 10000000) ? 7 : (input >= 1000000) ? 6 : 
+        (input >= 100000) ? 5 : (input >= 10000) ? 4 :
+        (input >= 1000) ? 3 : (input >= 100) ? 2 : (input >= 10) ? 1 : 0; 
+}
+int __fast_pow_10(int pow){
+    if(pow > 9 || pow < 0){
+        printf("error the exponent in __fast_pow_10 was out of bounds\n");
+        return -1;
+    }
+    return (pow == 0) ? 1 : (pow == 1) ? 10 : (pow == 2) ? 100 : (pow == 3) ? 1000 :
+    (pow == 4) ? 10000 : (pow == 5) ? 100000 : (pow == 6) ? 1000000 : (pow == 7) ? 10000000 : 
+    (pow == 8) ? 100000000 : 1000000000;
 }

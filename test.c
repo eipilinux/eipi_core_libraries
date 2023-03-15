@@ -1,5 +1,8 @@
 #include "bigint.h"
-
+#include <math.h>
+/*
+    this testing program should also be able to give results on the speed and performance of the library
+*/
 
 #define CHECK(exp) \
     ((exp) ? (void)0 : printf("line " BOLDRED "%d" RESET " in file " BOLDGREEN "%s" RESET " expression " BOLDCYAN "%s" RESET " was false\n", __LINE__, __FILE__, #exp))
@@ -54,6 +57,7 @@ boolean test_create_from_int(void){         /* FIN */
     int test_int[size_of_test];
     for(int i = 0; i < size_of_test; i++){
         test_int[i] = rand();
+        test_int[i] *= (test_int[i] % 2 == 1) ? -1 : 1;
         test_num[i] = create_from_int(test_int[i]);
     }
     for(int i = 0; i < size_of_test; i++){
@@ -64,9 +68,10 @@ boolean test_create_from_int(void){         /* FIN */
             return FALSE;
         }
         #ifdef VERBOSE_TESTING
+            printf("the actual number is: %d", test_int[i]);
             __obj_details(test_num[i], __LINE__, __FILE__);
         #endif
-        int realnum_digits = (int)(log10((double)abs(test_int[i]))+1);
+        int realnum_digits = (test_int[i] != 0) ? (int)(log10((double)abs(test_int[i]))+1) : 1;
         char printable[100];
         for(int j = 0; j < test_num[i]->num_of_digits; j++){
             printable[j] = test_num[i]->data[j];
@@ -85,22 +90,23 @@ boolean test_create_from_int(void){         /* FIN */
     }
     return test_result;
 }
-boolean test_create_from_string(void){
+boolean test_create_from_string(void){      /* FIN */
     boolean retval = TRUE;
-    // char* test_cases[] = {"0", "1", "-1", "10", "123456"};
-    // int num_tests = sizeof(test_cases);
-    // bigint* nums[num_tests];
-    // for(int i = 0; i < num_tests; i++){
-    //     nums[i] = create_from_string(test_cases[i]);
-    //     #ifdef VERBOSE_TESTING
-    //         __obj_details(num, __LINE__, __FILE__);
-    //     #endif
-    //     char* numstr = to_string(nums[i]);
-    //     if(__strcmp(numstr, test_cases[i]) != 0)
-    //         retval = FALSE;
-    //     free(numstr);
-    //     destroy(nums[i]);
-    // }
+    char* test_cases[] = {"0", "1", "-1", "10", "123456"};
+    int num_tests = sizeof(test_cases)/sizeof(test_cases[0]);
+    bigint* nums;
+    for(int i = 0; i < num_tests; i++){
+        nums = create_from_string(test_cases[i]);
+        char* numstr = to_string(nums);
+        #ifdef VERBOSE_TESTING
+            printf("This string: %s produced the number: %s", test_cases[i], numstr);
+            __obj_details(nums, __LINE__, __FILE__);
+        #endif
+        if(__strcmp(numstr, test_cases[i]) != 0)
+            retval = FALSE;
+        free(numstr);
+        destroy(nums);
+    }
     return retval;
 }
 boolean test_to_int(void){                  /* FIN */
@@ -165,11 +171,73 @@ boolean test_destroy(void){                 /* FIN */
     test_result = destroy(a_num);
     return test_result;
 }				
-boolean test_bigint_add(void){
-    return FALSE;
+boolean test_bigint_add(void){              /* FIN */
+    boolean retval = TRUE;
+    const int number_of_tests = 10;
+    int numbers_to_test_with[number_of_tests];
+    bigint* bigint_numbers[number_of_tests];
+    for(int i = 0; i < number_of_tests; i++){
+        numbers_to_test_with[i] = (rand() / 3);   //make sure that we don't overflow the int
+        numbers_to_test_with[i] *= (numbers_to_test_with[i] % 2 == 1) ? -1 : 1;
+        bigint_numbers[i] = create_from_int(numbers_to_test_with[i]);
+        #ifdef VERBOSE_TESTING
+            __obj_details(bigint_numbers[i], __LINE__, __FILE__);
+        #endif
+    }
+    for(int i = 0; i < number_of_tests; i++){
+        int first, second;
+        first = i;
+        second = (i == number_of_tests - 1) ? i : i+1;
+        bigint* sum = create_zero();
+        bigint_add(sum, bigint_numbers[first], bigint_numbers[second]);
+        #ifdef VERBOSE_TESTING
+            printf("the result of: %d plus: %d is: %d\n", 
+            numbers_to_test_with[first], 
+            numbers_to_test_with[second],
+            numbers_to_test_with[first] + numbers_to_test_with[second]);
+            printf("we got: %d\n", to_int(sum));
+            __obj_details(sum, __LINE__, __FILE__);
+        #endif
+        if(to_int(sum) != numbers_to_test_with[first] + numbers_to_test_with[second])
+            retval = FALSE;
+        destroy(sum);
+        destroy(bigint_numbers[i]);
+    }
+    return retval;
 } 
 boolean test_bigint_sub(void){
-    return FALSE;
+    boolean retval = TRUE;
+    const int number_of_tests = 10;
+    int numbers_to_test_with[number_of_tests];
+    bigint* bigint_numbers[number_of_tests];
+    for(int i = 0; i < number_of_tests; i++){
+        numbers_to_test_with[i] = (rand() / 2);   //make sure that we don't overflow the int
+        numbers_to_test_with[i] *= (numbers_to_test_with[i] % 2 == 1) ? -1 : 1;
+        bigint_numbers[i] = create_from_int(numbers_to_test_with[i]);
+        #ifdef VERBOSE_TESTING
+            __obj_details(bigint_numbers[i], __LINE__, __FILE__);
+        #endif
+    }
+    for(int i = 0; i < number_of_tests; i++){
+        int first, second;
+        first = i;
+        second = (i == number_of_tests - 1) ? i : i+1;
+        bigint* sum = create_zero();
+        bigint_sub(sum, bigint_numbers[first], bigint_numbers[second]);
+        #ifdef VERBOSE_TESTING
+            printf("the result of: %d minus: %d is: %d\n", 
+            numbers_to_test_with[first], 
+            numbers_to_test_with[second],
+            numbers_to_test_with[first] - numbers_to_test_with[second]);
+            printf("we got: %d\n", to_int(sum));
+            __obj_details(sum, __LINE__, __FILE__);
+        #endif
+        if(to_int(sum) != numbers_to_test_with[first] - numbers_to_test_with[second])
+            retval = FALSE;
+        destroy(sum);
+        destroy(bigint_numbers[i]);
+    }
+    return retval;
 } 
 boolean test_bigint_mul(void){
     return FALSE;
@@ -213,7 +281,7 @@ boolean test_int_cmp(void){
 boolean test_int_cmp_abs(void){
     return FALSE;
 }
-boolean test_bigint_is_zero(void){          /* FIN */
+boolean test_bigint_is_zero(void){              /* FIN */
     boolean retval = TRUE;
     bigint* nums[3];
     nums[0] = create_zero();
@@ -240,7 +308,7 @@ boolean test_bigint_copy(void){
 }
 
 
-boolean test_everything(void){              /* FIN */
+boolean test_everything(void){                  /* FIN */
     boolean result_of_tests = TRUE;
     printf("\nEntering the main testing system...\n");
     if(test_create_zero())
