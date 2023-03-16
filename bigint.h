@@ -2,9 +2,9 @@
 #define BIGINT
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> //godamn memcpy
 //#include <math.h>
 //#include <limits.h>
-#include <string.h> //godamn memcpy
 //========================================================================================================================================================
 // perhaps the end goal could be to replicate an efficient version of the python standard library for C with minimal dependencies
 //========================================================================================================================================================

@@ -305,37 +305,180 @@ boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
     return retval;
 } 
 boolean test_bigint_mul(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_div(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_mod(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_divmod(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_pow(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_sqr(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }			  
 boolean test_bigint_cube(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }		   	  
 boolean test_bigint_isqrt(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }          
 boolean test_bigint_factorial(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }	  
 boolean test_bigint_n_choose_k(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 } 
 boolean test_bigint_random(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }
 boolean test_bigint_cmp(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
@@ -492,13 +635,61 @@ boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
     return retval;
 }                      
 boolean test_bigint_inc(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }                             
 boolean test_bigint_dec(double* amount_of_time){
-    return FALSE;
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    for(int i = 0; i < num_of_tests; i++){
+        //initialize everything
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        //do the thing a bunch of times
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        //destroy(nums[i]);   //clean up after ourselves
+    }
+    return FALSE;//retval;
 }                             
-boolean test_bigint_copy(double* amount_of_time){
-    return FALSE;
+boolean test_bigint_copy(double* amount_of_time){                 /* FIN */
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    bigint* sources[num_of_tests];
+    bigint* dests[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        sources[i] = create_from_int(rand());
+        dests[i] = create_zero();
+        #ifdef VERBOSE_TESTING
+            __obj_details(sources[i], __LINE__, __FILE__);
+        #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        bigint_copy(dests[i], sources[i]);
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        if(to_int(sources[i]) != to_int(dests[i]))
+            retval = FALSE;
+        destroy(sources[i]);   //clean up after ourselves
+        destroy(dests[i]);
+    }
+    return retval;
 }
 
 

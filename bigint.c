@@ -205,7 +205,7 @@ void bigint_copy(bigint* dst, bigint* src){
     __internal_make_correct_digit_allocation(dst, src->num_of_digits);
     dst->sign = src->sign;
     dst->num_of_digits = src->num_of_digits;
-    memcpy(dst->data, src->data, dst->num_of_digits);
+    memcpy(dst->data, src->data, dst->num_of_digits); //memcpy is very fast, unfortunetly it uses the string.h lib which i would prefer not to use
 }
 boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){       /* FIN */
     if(num->num_allocated >= num_digits_needed)
