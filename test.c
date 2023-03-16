@@ -13,7 +13,7 @@
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
 //#define VERBOSE_TESTING
 
-boolean test_create_zero(double* amount_of_time){             /* FIN */
+boolean test_create_zero(double* amount_of_time){                 /* FIN */
     const int number_of_tests = 1000;
     boolean test_result = FALSE;
     bigint* test_num[number_of_tests];
@@ -41,7 +41,7 @@ boolean test_create_zero(double* amount_of_time){             /* FIN */
     }
     return test_result;
 }				
-boolean test_create_one(double* amount_of_time){              /* FIN */
+boolean test_create_one(double* amount_of_time){                  /* FIN */
     const int number_of_tests = 1000;
     boolean test_result = FALSE;
     bigint* test_num[number_of_tests];
@@ -69,7 +69,7 @@ boolean test_create_one(double* amount_of_time){              /* FIN */
     }
     return test_result;
 }					
-boolean test_create_from_int(double* amount_of_time){         /* FIN */
+boolean test_create_from_int(double* amount_of_time){             /* FIN */
     const int size_of_test = 1000;
     boolean test_result = TRUE;
     bigint* test_num[size_of_test];
@@ -113,35 +113,48 @@ boolean test_create_from_int(double* amount_of_time){         /* FIN */
     }
     return test_result;
 }
-boolean test_create_from_string(double* amount_of_time){      /*  */
+boolean test_create_from_string(double* amount_of_time){          /* FIN */
     boolean retval = TRUE;
-    char* test_cases[] = {"0", "1", "-1", "10", "123456"};
-    int num_tests = sizeof(test_cases)/sizeof(test_cases[0]);
-    bigint* nums;
-    for(int i = 0; i < num_tests; i++){
-        nums = create_from_string(test_cases[i]);
-        char* numstr = to_string(nums);
+    const int num_of_tests = 1000;
+    char* test_cases[] = {"0", "1", "-1", "10", "123456", "-10000", "2130000000000000909", "-2130000000000000908"};
+    int num_tests_per_loop = sizeof(test_cases)/sizeof(test_cases[0]);
+    bigint* nums[num_of_tests];
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        nums[i] = create_from_string(test_cases[i%num_tests_per_loop]);
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        char* numstr = to_string(nums[i]);
         #ifdef VERBOSE_TESTING
-            printf("This string: %s produced the number: %s", test_cases[i], numstr);
-            __obj_details(nums, __LINE__, __FILE__);
+            printf("This string: %s produced the number: %s", test_cases[i%num_tests_per_loop], numstr);
+            __obj_details(nums[i], __LINE__, __FILE__);
         #endif
-        if(__strcmp(numstr, test_cases[i]) != 0)
+        if(__strcmp(numstr, test_cases[i%num_tests_per_loop]) != 0)
             retval = FALSE;
         free(numstr);
-        destroy(nums);
+        destroy(nums[i]);
     }
     return retval;
 }
-boolean test_to_int(double* amount_of_time){                  /*  */
+boolean test_to_int(double* amount_of_time){                      /* FIN */
     boolean retval = TRUE;
-    const int number_of_tests = 10;
+    const int number_of_tests = 1000;
     int numbers_to_test_with[number_of_tests];
     bigint* bigint_numbers[number_of_tests];
+    int numbers_to_compare[number_of_tests];
     for(int i = 0; i < number_of_tests; i++){
         numbers_to_test_with[i] = rand();
         bigint_numbers[i] = create_from_int(numbers_to_test_with[i]);
-        if(to_int(bigint_numbers[i]) != numbers_to_test_with[i]){
-            printf("There was an issue, %d is what the number should be and %d is what to_int() produced\n", numbers_to_test_with[i], to_int(bigint_numbers[i]));
+    }
+    clock_t START = clock();
+    for(int i = 0; i < number_of_tests; i++){
+        numbers_to_compare[i] = to_int(bigint_numbers[i]);
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < number_of_tests; i++){
+        if(numbers_to_compare[i] != numbers_to_test_with[i]){
+            printf("There was an issue, %d is what the number should be and %d is what to_int() produced\n", numbers_to_test_with[i], numbers_to_compare[i]);
             retval = FALSE;
         }
         #ifdef VERBOSE_TESTING
@@ -151,11 +164,12 @@ boolean test_to_int(double* amount_of_time){                  /*  */
     }
     return retval;
 }					
-boolean test_to_string(double* amount_of_time){               /*  */
-    const int size_of_test = 10;
+boolean test_to_string(double* amount_of_time){                   /* FIN */
+    const int size_of_test = 1000;
     boolean test_result = TRUE;
     bigint* test_num[size_of_test];
     int test_int[size_of_test];
+    char* result_to_compare[size_of_test];
     for(int i = 0; i < size_of_test; i++){
         test_int[i] = rand();
         test_num[i] = create_from_int(test_int[i]);
@@ -163,42 +177,55 @@ boolean test_to_string(double* amount_of_time){               /*  */
             __obj_details(test_num[i], __LINE__, __FILE__);
         #endif
     }
+    clock_t START = clock();
     for(int i = 0; i < size_of_test; i++){
-        char* result_to_compare = to_string(test_num[i]);
+        result_to_compare[i] = to_string(test_num[i]);
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < size_of_test; i++){
         int a = 0;
         for(int j = test_num[i]->num_of_digits - 1; j >= 0; j--){
-            if(result_to_compare[a] != (test_num[i]->data[j] + 48)){
-                printf("Test failed at line %d due to %c not equaling %c\n", __LINE__, result_to_compare[a], test_num[i]->data[j]);
+            if(result_to_compare[i][a] != (test_num[i]->data[j] + 48)){
+                printf("Test failed at line %d due to %c not equaling %c\n", __LINE__, result_to_compare[i][a], test_num[i]->data[j]);
                 printf("The number is supposed to be: %d\n", test_int[i]);
-                printf("The string generated by to_string was: %s\n", result_to_compare);
+                printf("The string generated by to_string was: %s\n", result_to_compare[i]);
                 return FALSE;
             }
             a++;
         }
-        if(result_to_compare[test_num[i]->num_of_digits] != '\0'){
-            printf("Test failed at line %d due to %c not equaling null\n", __LINE__, result_to_compare[test_num[i]->num_of_digits]);
+        if(result_to_compare[i][test_num[i]->num_of_digits] != '\0'){
+            printf("Test failed at line %d due to %c not equaling null\n", __LINE__, result_to_compare[i][test_num[i]->num_of_digits]);
             printf("The number is supposed to be: %d\n", test_int[i]);
             return FALSE;
         }
-        free(result_to_compare);
+        free(result_to_compare[i]);
         destroy(test_num[i]);
     }
     return test_result;
 }				
-boolean test_destroy(double* amount_of_time){                 /*  */
+boolean test_destroy(double* amount_of_time){                     /* FIN */
     boolean test_result =  FALSE;
-    bigint* a_num = create_one();
-    #ifdef VERBOSE_TESTING
-        __obj_details(a_num, __LINE__, __FILE__);
-    #endif
-    test_result = destroy(a_num);
+    const int number_of_tests = 1000;
+    bigint* a_num[number_of_tests];
+    clock_t START = clock();
+    for(int i = 0; i < number_of_tests; i++){
+        a_num[i] = create_one();
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < number_of_tests; i++){
+        #ifdef VERBOSE_TESTING
+            __obj_details(a_num[i], __LINE__, __FILE__);
+        #endif
+        test_result = destroy(a_num[i]);
+    }
     return test_result;
 }				
-boolean test_bigint_add(double* amount_of_time){              /*  */
+boolean test_bigint_add(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int number_of_tests = 10;
+    const int number_of_tests = 1000;
     int numbers_to_test_with[number_of_tests];
     bigint* bigint_numbers[number_of_tests];
+    bigint* sums[number_of_tests];
     for(int i = 0; i < number_of_tests; i++){
         numbers_to_test_with[i] = (rand() / 3);   //make sure that we don't overflow the int
         numbers_to_test_with[i] *= (numbers_to_test_with[i] % 2 == 1) ? -1 : 1;
@@ -206,29 +233,36 @@ boolean test_bigint_add(double* amount_of_time){              /*  */
         #ifdef VERBOSE_TESTING
             __obj_details(bigint_numbers[i], __LINE__, __FILE__);
         #endif
+        sums[i] = create_zero();
     }
+    clock_t START = clock();
     for(int i = 0; i < number_of_tests; i++){
         int first, second;
         first = i;
         second = (i == number_of_tests - 1) ? i : i+1;
-        bigint* sum = create_zero();
-        bigint_add(sum, bigint_numbers[first], bigint_numbers[second]);
+        bigint_add(sums[i], bigint_numbers[first], bigint_numbers[second]);
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < number_of_tests; i++){
+        int first, second;
+        first = i;
+        second = (i == number_of_tests - 1) ? i : i+1;
         #ifdef VERBOSE_TESTING
             printf("the result of: %d plus: %d is: %d\n", 
             numbers_to_test_with[first], 
             numbers_to_test_with[second],
             numbers_to_test_with[first] + numbers_to_test_with[second]);
-            printf("we got: %d\n", to_int(sum));
-            __obj_details(sum, __LINE__, __FILE__);
+            printf("we got: %d\n", to_int(sums[i]));
+            __obj_details(sums[i], __LINE__, __FILE__);
         #endif
-        if(to_int(sum) != numbers_to_test_with[first] + numbers_to_test_with[second])
+        if(to_int(sums[i]) != numbers_to_test_with[first] + numbers_to_test_with[second])
             retval = FALSE;
-        destroy(sum);
+        destroy(sums[i]);
         destroy(bigint_numbers[i]);
     }
     return retval;
 } 
-boolean test_bigint_sub(double* amount_of_time){              /* FIN */
+boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
     const int number_of_tests = 1000;
     int numbers_to_test_with[number_of_tests];
@@ -261,7 +295,7 @@ boolean test_bigint_sub(double* amount_of_time){              /* FIN */
             numbers_to_test_with[second],
             numbers_to_test_with[first] - numbers_to_test_with[second]);
             printf("we got: %d\n", to_int(diffs[i]));
-            __obj_details(sum, __LINE__, __FILE__);
+            __obj_details(diffs[i], __LINE__, __FILE__);
         #endif
         if(to_int(diffs[i]) != numbers_to_test_with[first] - numbers_to_test_with[second])
             retval = FALSE;
@@ -300,30 +334,159 @@ boolean test_bigint_factorial(double* amount_of_time){
 boolean test_bigint_n_choose_k(double* amount_of_time){
     return FALSE;
 } 
-boolean test_bigint_cmp(double* amount_of_time){
+boolean test_bigint_random(double* amount_of_time){
     return FALSE;
 }
-boolean test_bigint_cmp_abs(double* amount_of_time){
-    return FALSE;
-}     	
-boolean test_int_cmp(double* amount_of_time){
-    return FALSE;
-}
-boolean test_int_cmp_abs(double* amount_of_time){
-    return FALSE;
-}
-boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
+boolean test_bigint_cmp(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    bigint* nums[3];
-    nums[0] = create_zero();
-    nums[1] = create_from_int(0);
-    nums[2] = create_from_string("0"); //this may need testing
-    for(int i = 0; i < 3; i++){
+    const int num_of_tests = 1000;
+    bigint* nums[num_of_tests];
+    int check_numbers[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        check_numbers[i] = rand();
+        check_numbers[i] *= (check_numbers[i] % 3 == 0) ? -1 : 1;
+        if(i == 0 || i == 1){
+            check_numbers[i] = 10 * ((i == 0) ? -1 : 1);
+        }
+        nums[i] = create_from_int(check_numbers[i]);
         #ifdef VERBOSE_TESTING
             __obj_details(nums[i], __LINE__, __FILE__);
         #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        int real_result = (check_numbers[i] == check_numbers[(i+1)%num_of_tests]) ? 0 : 
+            (check_numbers[i] > check_numbers[(i+1)%num_of_tests]) ? 1 : -1;
+        if(bigint_cmp(nums[i], nums[(i+1)%num_of_tests]) != real_result)
+            retval = FALSE;
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        destroy(nums[i]);
+    }
+    return retval;
+}
+boolean test_bigint_cmp_abs(double* amount_of_time){              /* FIN */
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    bigint* nums[num_of_tests];
+    int check_numbers[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        check_numbers[i] = rand();
+        check_numbers[i] *= (check_numbers[i] % 3 == 0) ? -1 : 1;
+        if(i == 0 || i == 1){
+            check_numbers[i] = 10 * ((i == 0) ? -1 : 1);
+        }
+        nums[i] = create_from_int(check_numbers[i]);
+        #ifdef VERBOSE_TESTING
+            __obj_details(nums[i], __LINE__, __FILE__);
+        #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        int real_result = (abs(check_numbers[i]) == abs(check_numbers[(i+1)%num_of_tests])) ? 0 : 
+            (abs(check_numbers[i]) > abs(check_numbers[(i+1)%num_of_tests])) ? 1 : -1;
+        if(bigint_cmp_abs(nums[i], nums[(i+1)%num_of_tests]) != real_result)
+            retval = FALSE;
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        destroy(nums[i]);
+    }
+    return retval;
+}     	
+boolean test_int_cmp(double* amount_of_time){                     /* FIN */
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    bigint* nums[num_of_tests];
+    int check_numbers[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        check_numbers[i] = rand();
+        check_numbers[i] *= (check_numbers[i] % 3 == 0) ? -1 : 1;
+        if(i == 0 || i == 1){
+            check_numbers[i] = 10 * ((i == 0) ? -1 : 1);
+        }
+        nums[i] = create_from_int(check_numbers[i]);
+        #ifdef VERBOSE_TESTING
+            __obj_details(nums[i], __LINE__, __FILE__);
+        #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        int real_result = (check_numbers[i] == check_numbers[(i+1)%num_of_tests]) ? 0 : 
+            (check_numbers[i] > check_numbers[(i+1)%num_of_tests]) ? 1 : -1;
+        if(int_cmp(nums[i], check_numbers[(i+1)%num_of_tests]) != real_result){
+            #ifdef VERBOSE_TESTING
+                printf("the comparison of: %d and %d should yield: %d instead we got: %d\n", 
+                to_int(nums[i]), check_numbers[(i+1)%num_of_tests], 
+                real_result, int_cmp(nums[i], check_numbers[(i+1)%num_of_tests]));
+            #endif
+            retval = FALSE;
+        }
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        destroy(nums[i]);
+    }
+    return retval;
+}
+boolean test_int_cmp_abs(double* amount_of_time){                 /* FIN */
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    bigint* nums[num_of_tests];
+    int check_numbers[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        check_numbers[i] = rand();
+        check_numbers[i] *= (check_numbers[i] % 3 == 0) ? -1 : 1;
+        if(i == 0 || i == 1){
+            check_numbers[i] = 10 * ((i == 0) ? -1 : 1);
+        }
+        nums[i] = create_from_int(check_numbers[i]);
+        #ifdef VERBOSE_TESTING
+            __obj_details(nums[i], __LINE__, __FILE__);
+        #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
+        int real_result = (abs(check_numbers[i]) == abs(check_numbers[(i+1)%num_of_tests])) ? 0 : 
+            (abs(check_numbers[i]) > abs(check_numbers[(i+1)%num_of_tests])) ? 1 : -1;
+        if(int_cmp_abs(nums[i], check_numbers[(i+1)%num_of_tests]) != real_result){
+            #ifdef VERBOSE_TESTING
+                printf("the comparison of: %d and %d should yield: %d instead we got: %d\n", 
+                to_int(nums[i]), check_numbers[(i+1)%num_of_tests], 
+                real_result, int_cmp_abs(nums[i], check_numbers[(i+1)%num_of_tests]));
+            #endif
+            retval = FALSE;
+        }
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
+        destroy(nums[i]);
+    }
+    return retval;
+}
+boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
+    boolean retval = TRUE;
+    const int num_of_tests = 1000;
+    bigint* nums[num_of_tests];
+    for(int i = 0; i < num_of_tests; i++){
+        if(i%3 == 0)
+            nums[i] = create_zero();
+        if(i%3 == 1)
+            nums[i] = create_from_int(0);
+        if(i%3 == 2)
+            nums[i] = create_from_string("0");
+        #ifdef VERBOSE_TESTING
+            __obj_details(nums[i], __LINE__, __FILE__);
+        #endif
+    }
+    clock_t START = clock();
+    for(int i = 0; i < num_of_tests; i++){
         if(!bigint_is_zero(nums[i]))
             retval = FALSE;
+    }
+    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    for(int i = 0; i < num_of_tests; i++){
         destroy(nums[i]);
     }
     return retval;
@@ -339,168 +502,230 @@ boolean test_bigint_copy(double* amount_of_time){
 }
 
 
-boolean test_everything(void){                  /* FIN */
+boolean test_everything(void){                                    /* FIN */
     boolean result_of_tests = TRUE;
-    double function_speed = 0;
+    double function_speed = 0.0;
     printf("\nEntering the main testing system...\n");
-    if(test_create_zero(&function_speed))
+    if(test_create_zero(&function_speed)){
         printf("Test of function: "BOLDWHITE"create_zero "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"create_zero "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;
     }
-    if(test_create_one(&function_speed))
+    if(test_create_one(&function_speed)){
         printf("Test of function: "BOLDWHITE"create_one "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"create_one "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;
     }
-    if(test_create_from_int(&function_speed))
+    if(test_create_from_int(&function_speed)){
         printf("Test of function: "BOLDWHITE"create_from_int "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"create_from_int "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;		
     }
-    if(test_create_from_string(&function_speed))
+    if(test_create_from_string(&function_speed)){
         printf("Test of function: "BOLDWHITE"create_from_string "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"create_from_string "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;   	
     }
-    if(test_to_int(&function_speed))
+    if(test_to_int(&function_speed)){
         printf("Test of function: "BOLDWHITE"to_int "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"to_int "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 					
     }
-    if(test_to_string(&function_speed))
+    if(test_to_string(&function_speed)){
         printf("Test of function: "BOLDWHITE"to_string "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"to_string "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;  				
     }
-    if(test_destroy(&function_speed))
+    if(test_destroy(&function_speed)){
         printf("Test of function: "BOLDWHITE"destroy "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"destroy "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;			
     }
-    if(test_bigint_add(&function_speed))
+    if(test_bigint_add(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_add "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_add "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 
     }
-    if(test_bigint_sub(&function_speed))
+    if(test_bigint_sub(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_sub "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_sub "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 
     }
-    if(test_bigint_mul(&function_speed))
+    if(test_bigint_mul(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_mul "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_mul "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 
     }
-    if(test_bigint_div(&function_speed))
+    if(test_bigint_div(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_div "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_div "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;  
     }
-    if(test_bigint_mod(&function_speed))
+    if(test_bigint_mod(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_mod "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_mod "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;  
     }
-    if(test_bigint_divmod(&function_speed))
+    if(test_bigint_divmod(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_divmod "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_divmod "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;   
     }
-    if(test_bigint_pow(&function_speed))
+    if(test_bigint_pow(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_pow "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_pow "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 
     }
-    if(test_bigint_sqr(&function_speed))
+    if(test_bigint_sqr(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_sqr "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_sqr "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;			  
     }
-    if(test_bigint_cube(&function_speed))
+    if(test_bigint_cube(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_cube "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_cube "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;	   	  
     }
-    if(test_bigint_isqrt(&function_speed))
+    if(test_bigint_isqrt(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_isqrt "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_isqrt "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;      
     }
-    if(test_bigint_factorial(&function_speed))
+    if(test_bigint_factorial(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_factorial "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_factorial "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;  
     }
-    if(test_bigint_n_choose_k(&function_speed))
+    if(test_bigint_n_choose_k(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_n_choose_k "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_n_choose_k "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE; 
     }
-    if(test_bigint_cmp(&function_speed))
+    if(test_bigint_random(&function_speed)){
+        printf("Test of function: "BOLDWHITE"bigint_random "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
+    else{
+        printf("Test of function: "BOLDWHITE"bigint_random "BOLDRED"FAILED\n"RESET);
+        result_of_tests = FALSE; 
+    }
+    if(test_bigint_cmp(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_cmp "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_cmp "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;        
     }
-    if(test_bigint_cmp_abs(&function_speed))
+    if(test_bigint_cmp_abs(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_cmp_abs "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_cmp_abs "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;      	
     }
-    if(test_int_cmp(&function_speed))
+    if(test_int_cmp(&function_speed)){
         printf("Test of function: "BOLDWHITE"int_cmp "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"int_cmp "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;        
     }
-    if(test_int_cmp_abs(&function_speed))
+    if(test_int_cmp_abs(&function_speed)){
         printf("Test of function: "BOLDWHITE"int_cmp_abs "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"int_cmp_abs "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;      	
     }
-    if(test_bigint_is_zero(&function_speed))
+    if(test_bigint_is_zero(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_is_zero "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_is_zero "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;                         
     }
-    if(test_bigint_inc(&function_speed))
+    if(test_bigint_inc(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_inc "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_inc "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;                                
     }
-    if(test_bigint_dec(&function_speed))
+    if(test_bigint_dec(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_dec "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_dec "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;                               
     }
-    if(test_bigint_copy(&function_speed))
+    if(test_bigint_copy(&function_speed)){
         printf("Test of function: "BOLDWHITE"bigint_copy "BOLDGREEN"PASSED"RESET" and took: %g msec\n", function_speed);
+        function_speed = 0.0;
+    }
     else{
         printf("Test of function: "BOLDWHITE"bigint_copy "BOLDRED"FAILED\n"RESET);
         result_of_tests = FALSE;
@@ -511,36 +736,6 @@ boolean test_everything(void){                  /* FIN */
 
 
 int main(){
-    // bigint* zero = create_zero();
-    // char* printable = to_string(zero);
-    // printf("The zero number is: %s\n", printable);
-    // free(printable);
-    // destroy(zero);
-    // bigint* number = create_from_int(-102);
-    // char* numprintable = to_string(number);
-    // printf("The other number is: %s\nand data is: ", numprintable);
-    // for(int i = 0; i<number->num_of_digits; i++){
-    //     printf("%d", (int)number->data[i]);
-    // }
-    // printf("\n");
-    // bigint* second = create_from_int(12);
-    // char* printnum = to_string(second);
-    // bigint* added = create_zero();
-    // bigint_add(added, number, second);
-    // char* printnum2 = to_string(added);
-    // printf("%s plus %s is: %s\n", numprintable, printnum, printnum2);
-    // printf("compare(12, -102): %d\n", bigint_cmp(second, number));
-    // printf("abs_compare(12, -102): %d\n", bigint_cmp_abs(second, number));
-    // __obj_details(second, __LINE__, __FILE__);
-    // //CHECK(21+2==1);
-    // free(numprintable);
-    // free(printnum);
-    // free(printnum2);
-    // destroy(second);
-    // destroy(added);
-    // destroy(number);
-
     test_everything();
-
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 //#include <math.h>
 //#include <limits.h>
-//#include <string.h>
+#include <string.h> //godamn memcpy
 //========================================================================================================================================================
 // perhaps the end goal could be to replicate an efficient version of the python standard library for C with minimal dependencies
 //========================================================================================================================================================
@@ -67,7 +67,7 @@ boolean destroy(bigint* num);				/* this frees the object and sets it to null */
 //============================================================================
 // User Function Basic Math Prototypes
 //============================================================================
-/* Basic arithmetic operations: */
+/* Basic math operations */
 void bigint_add(bigint* result, bigint* a, bigint* b); /* result = a + b */
 void bigint_sub(bigint* result, bigint* a, bigint* b); /* result = a - b */
 void bigint_mul(bigint* result, bigint* a, bigint* b); /* result = a * b */
@@ -78,8 +78,11 @@ void bigint_pow(bigint* result, bigint* a, bigint* b); /* result = a^b ie 10^4 =
 void bigint_sqr(bigint* result, bigint* a);			   /* result = a^2 ie 5^2 = 25 */
 void bigint_cube(bigint* result, bigint* a);		   /* result = a^3 ie 2^3 = 8 */
 void bigint_isqrt(bigint* result, bigint* a);          /* Integer square root ie isqrt(5) => 2 */
+
+/* More complex math operations */
 void bigint_factorial(bigint* result, bigint* a);	   /* result = a! */
 void bigint_n_choose_k(bigint* result, bigint* n, bigint* k); /* result = n choose k = n!/(k!(n-k)!) */
+void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound); /* generate a cryptographically secure psuedo random number in the range specifid */
 
 /* Special operators and comparison */
 int bigint_cmp(bigint* a, bigint* b);               	/* Compare: returns 1 if a > b, 0 if a == b, and -1 if a < b */

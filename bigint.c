@@ -89,7 +89,7 @@ void bigint_add(bigint* result, bigint* a, bigint* b){  /* FIN */
         result->sign = (bigint_cmp_abs(a, b) == 0) ? POSITIVE : (bigint_cmp_abs(a, b) > 0) ? a->sign : b->sign;  //figure out the dominant sign
     }
 }
-void bigint_sub(bigint* result, bigint* a, bigint* b){
+void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
     if(a->sign == b->sign){
         if(a->sign == POSITIVE){    //if both are positive then it is just a vanilla subtraction of a-b
             __positive_difference(result, a, b);
@@ -107,7 +107,6 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){
     bigint* retval;
-    
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
     bigint* retval;
@@ -145,14 +144,18 @@ void bigint_n_choose_k(bigint* result, bigint* n, bigint* k){
     bigint* retval;
     
 }
-int bigint_cmp(bigint* a, bigint* b){
+void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound){
+    bigint* retval;
+
+}
+int bigint_cmp(bigint* a, bigint* b){              /* FIN */
     if(a->sign != b->sign)
         return (a->sign > b->sign) ? 1 : -1;
     if(a->sign)
         return bigint_cmp_abs(a, b);
     return bigint_cmp_abs(b, a);
 }
-int bigint_cmp_abs(bigint* a, bigint* b){
+int bigint_cmp_abs(bigint* a, bigint* b){          /* FIN */
     if(a->num_of_digits != b->num_of_digits)
         return (a->num_of_digits > b->num_of_digits) ? 1 : -1;
     for(int i = a->num_of_digits - 1; i >= 0; i--){
@@ -161,19 +164,19 @@ int bigint_cmp_abs(bigint* a, bigint* b){
     }
     return 0;
 }
-int int_cmp(bigint* a, int b){
+int int_cmp(bigint* a, int b){                     /* FIN */
     boolean sign_of_b = (b >= 0) ? POSITIVE : NEGATIVE;
     if(sign_of_b == a->sign)
         return (a->sign == POSITIVE) ? int_cmp_abs(a, b) : -1*int_cmp_abs(a, b);
     return (a->sign == POSITIVE) ? 1 : -1;
 }
-int int_cmp_abs(bigint* a, int b){
-    int number_to_compare = abs(to_int(a));
-    if(number_to_compare == 0 && a->num_of_digits > 1)
+int int_cmp_abs(bigint* a, int b){                 /* FIN */
+    if(a->num_of_digits > 10) //this makes sure that if we are going to exceed the int bounds we can return quickly and correctly that abs(a) > abs(b)
         return 1;
-    if(number_to_compare == b)
+    int number_to_compare = abs(to_int(a));
+    if(number_to_compare == abs(b))
         return 0;
-    return (number_to_compare > b) ? 1 : -1;
+    return (number_to_compare > abs(b)) ? 1 : -1;
 }
 boolean bigint_is_zero(bigint* n){                 /* FIN */
     if(n->num_of_digits == 1 && n->data[0] == 0)
@@ -199,7 +202,10 @@ void bigint_dec(bigint* n){
     
 }
 void bigint_copy(bigint* dst, bigint* src){
-    bigint* retval;
+    __internal_make_correct_digit_allocation(dst, src->num_of_digits);
+    dst->sign = src->sign;
+    dst->num_of_digits = src->num_of_digits;
+    memcpy(dst->data, src->data, dst->num_of_digits);
 }
 boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){       /* FIN */
     if(num->num_allocated >= num_digits_needed)
