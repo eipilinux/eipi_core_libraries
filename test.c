@@ -307,16 +307,30 @@ boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
 boolean test_bigint_mul(double* amount_of_time){
     boolean retval = TRUE;
     const int num_of_tests = 1000;
+    bigint* a_nums[num_of_tests];
+    bigint* b_nums[num_of_tests];
+    bigint* result_nums[num_of_tests];
+    int a_b_and_result[num_of_tests][3];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        a_b_and_result[i][0] = (int)sqrt(rand() / 2);
+        a_b_and_result[i][1] = (int)sqrt(rand() / 2);
+        a_b_and_result[i][2] = a_b_and_result[i][0]*a_b_and_result[i][1];
+        a_nums[i] = create_from_int(a_b_and_result[i][0]);
+        b_nums[i] = create_from_int(a_b_and_result[i][1]);
+        result_nums[i] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_mul(result_nums[i], a_nums[i], b_nums[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(result_nums[i]) != a_b_and_result[i][2])
+            retval = FALSE;
+        destroy(a_nums[i]);   //clean up after ourselves
+        destroy(b_nums[i]);
+        destroy(result_nums[i]);
     }
     return FALSE;//retval;
 } 

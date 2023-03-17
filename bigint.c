@@ -106,6 +106,7 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
     }
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){
+    //we will be using a variation of the Karatsuba fast multiplication algorithm
     bigint* retval;
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
