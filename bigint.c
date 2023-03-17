@@ -206,7 +206,7 @@ void bigint_copy(bigint* dst, bigint* src){
     __internal_make_correct_digit_allocation(dst, src->num_of_digits);
     dst->sign = src->sign;
     dst->num_of_digits = src->num_of_digits;
-    memcpy(dst->data, src->data, dst->num_of_digits); //memcpy is very fast, unfortunetly it uses the string.h lib which i would prefer not to use
+    __internal_memcpy(dst->data, src->data, dst->num_of_digits); //memcpy is very fast, unfortunetly it uses the string.h lib which i would prefer not to use
 }
 boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){       /* FIN */
     if(num->num_allocated >= num_digits_needed)
@@ -269,6 +269,12 @@ void __obj_details(bigint* obj, int lineno, char* file){
         printf(RESET"\n");
     }
     printf("\n");
+}
+void __internal_memcpy(void* dest, const void* source, int size){
+    char* a = (char*)dest;
+    char* b = (char*)source;
+    while(size--)
+        *a++ = *b++;
 }
 int __strcmp(const char *s1, const char *s2){
    while (*s1 != '\0' && *s2 != '\0'  && *s1 == *s2) {

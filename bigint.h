@@ -2,7 +2,7 @@
 #define BIGINT
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> //godamn memcpy
+//#include <string.h>
 //#include <math.h>
 //#include <limits.h>
 //========================================================================================================================================================
@@ -102,6 +102,7 @@ boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_nee
 void __add_abs(bigint* sum, bigint* a, bigint* b); /* this adds the absolute values of the two numbers abs(a) + abs(b) */
 void __positive_difference(bigint* diff, bigint* a, bigint* b); /* this calculates abs(abs(a)-abs(b)) the positve difference between the two ie (20, -300) is 280 */
 void __obj_details(bigint* obj, int lineno, char* file); /* this is useful for debugging */
+void __internal_memcpy(void* dest, const void* source, int size); /* replaces the string.h implementation */
 int __strcmp(const char *s1, const char *s2);	/* this is just a copy of the standard string.h implementation of strcmp since that is one of the only function from that library that we utilize */
 size_t __strlen(const char *str);	/* this is just a copy of the standard string.h implementation of strlen since that is one of the only function from that library that we utilize */
 int __fast_int_log10(int input);	/* this is to replace the standard log10() function from math.h and significantly improve performance */

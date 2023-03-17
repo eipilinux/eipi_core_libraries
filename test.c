@@ -940,7 +940,14 @@ boolean test_everything(void){                                    /* FIN */
 }
 
 
+boolean compare_internal_functions(void){
+    //this is where we will benchmark and compare our internal library fuinctions to the speed of the glibc equivilants
+    return FALSE;
+}
+
+
 int main(){
+    compare_internal_functions();
     test_everything();
     return 0;
 }
