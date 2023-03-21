@@ -106,8 +106,19 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
     }
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){
-    //we will be using a variation of the Karatsuba fast multiplication algorithm
-    bigint* retval;
+    //we will be first using a nieve approach and then a variation of the Karatsuba fast multiplication algorithm
+    result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    int possible_num_of_digits = a->num_of_digits + b->num_of_digits;
+    __internal_make_correct_digit_allocation(result, possible_num_of_digits);
+    //chose the shorter one for the outside
+    //choose the longer one for the inside
+    bigint* larger = (bigint_cmp_abs(a, b) > 0) ? a : b;
+    bigint* smaller = (bigint_cmp_abs(a, b) > 0) ? b : a;
+    for(int i = 0; i < smaller->num_of_digits; i++){
+        for(int j = 0; j < larger->num_of_digits; j++){
+            
+        }
+    }
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
     bigint* retval;
