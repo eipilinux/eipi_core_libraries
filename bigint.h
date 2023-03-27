@@ -100,6 +100,7 @@ void bigint_copy(bigint* dst, bigint* src);        		/* Copy src into dst*/
 
 boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed);	/* this makes sure there is enough allocated memory for the num_digits_needed */
 void __add_abs(bigint* sum, bigint* a, bigint* b); /* this adds the absolute values of the two numbers abs(a) + abs(b) */
+void __fast_shift_10(bigint* num); /* this effectively is a bit shift but for a base 10 number */
 void __positive_difference(bigint* diff, bigint* a, bigint* b); /* this calculates abs(abs(a)-abs(b)) the positve difference between the two ie (20, -300) is 280 */
 void __obj_details(bigint* obj, int lineno, char* file); /* this is useful for debugging */
 void __internal_memcpy(void* dest, const void* source, int size); /* replaces the string.h implementation */

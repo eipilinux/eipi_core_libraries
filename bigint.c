@@ -114,10 +114,29 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){
     //choose the longer one for the inside
     bigint* larger = (bigint_cmp_abs(a, b) > 0) ? a : b;
     bigint* smaller = (bigint_cmp_abs(a, b) > 0) ? b : a;
+    bigint* stepwise_addends[3];
+    for(int i = 0; i < 3; i++){
+        stepwise_addends[i] = create_zero();
+        __internal_make_correct_digit_allocation(stepwise_addends[i], larger->num_of_digits + 1);
+    }
     for(int i = 0; i < smaller->num_of_digits; i++){
+        byte carry_over = 0;
         for(int j = 0; j < larger->num_of_digits; j++){
-            
+            stepwise_addends[0]->data[j] = smaller->data[i] * larger->data[j] + carry_over;
+            carry_over = 0;
+            if(stepwise_addends[0]->data[j] > 9){
+                carry_over = stepwise_addends[0]->data[j] / 10;
+                stepwise_addends[0]->data[j] %= 10;
+            }
         }
+        if(carry_over != 0){
+            stepwise_addends[0]->data[larger->num_of_digits] = carry_over;
+            stepwise_addends[0]->num_of_digits = larger->num_of_digits + 1;
+        }
+        else{
+            stepwise_addends[0]->num_of_digits = larger->num_of_digits;
+        }
+        
     }
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
@@ -195,23 +214,55 @@ boolean bigint_is_zero(bigint* n){                 /* FIN */
         return TRUE;
     return FALSE;
 }
-void bigint_inc(bigint* n){
-    if(n->sign){
-        __internal_make_correct_digit_allocation(n, n->num_of_digits + 1);
-        byte carry_over = 1; //this is how we add one
-        int i = 0;
-        do{
-            n->data[i] = ((n->num_of_digits > i) ? n->data[i] : 0) + carry_over;
-            carry_over = (n->data[i] > 9) ? n->data[i] - 9 : 0;
-            n->data[i] %= 10;
-            i++;
-        }while (carry_over > 0);
-        n->num_of_digits = (n->num_of_digits > i) ? n->num_of_digits : n->num_of_digits + 1;
+void bigint_inc(bigint* n){                        /* FIN */
+    if(n->sign == POSITIVE){
+        if(n->data[0] == 9){ //this means we will possibly need another digit and have to go through the additon routine
+            bigint* addon = create_one();
+            bigint* old_val = create_zero();
+            bigint_copy(old_val, n);
+            bigint_add(n, old_val, addon);
+        }
+        else{
+            n->data[0] += 1;
+        }
     }
-    //handle negative incriments
+    else{
+        if(n->data[0] == 0){ //this means we will have to possibly reduce the number of digits and go through the subtraction routine
+            bigint* addon = create_one();
+            bigint* old_val = create_zero();
+            bigint_copy(old_val, n);
+            bigint_add(n, old_val, addon);
+        }
+        else{
+            n->data[0] -= 1;
+        }
+    }
 }
-void bigint_dec(bigint* n){
-    
+void bigint_dec(bigint* n){                        /* FIN */
+    if(n->sign == NEGATIVE){
+        if(n->data[0] == 9){ //this means we will possibly need another digit and have to go through the additon routine
+            bigint* addon = create_one();
+            bigint* old_val = create_zero();
+            addon->sign = NEGATIVE;
+            bigint_copy(old_val, n);
+            bigint_add(n, old_val, addon);
+        }
+        else{
+            n->data[0] += 1;
+        }
+    }
+    else{
+        if(n->data[0] == 0){ //this means we will have to possibly reduce the number of digits and go through the subtraction routine
+            bigint* addon = create_one();
+            bigint* old_val = create_zero();
+            addon->sign = NEGATIVE;
+            bigint_copy(old_val, n);
+            bigint_add(n, old_val, addon);
+        }
+        else{
+            n->data[0] -= 1;
+        }
+    }
 }
 void bigint_copy(bigint* dst, bigint* src){
     __internal_make_correct_digit_allocation(dst, src->num_of_digits);
@@ -219,7 +270,7 @@ void bigint_copy(bigint* dst, bigint* src){
     dst->num_of_digits = src->num_of_digits;
     __internal_memcpy(dst->data, src->data, dst->num_of_digits); //memcpy is very fast, unfortunetly it uses the string.h lib which i would prefer not to use
 }
-boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){       /* FIN */
+boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){
     if(num->num_allocated >= num_digits_needed)
         return TRUE;
     byte* tmp = realloc(num->data, 2*num_digits_needed);
@@ -242,6 +293,14 @@ void __add_abs(bigint* sum, bigint* a, bigint* b){
     }
     sum->num_of_digits = (sum->data[length] > 0) ? length+1 : length;
     sum->sign = POSITIVE;
+}
+void __fast_shift_10(bigint* num){
+    __internal_make_correct_digit_allocation(num, num->num_of_digits+1);
+    for(int i = num->num_of_digits - 1; i >= 0; i++){
+        num->data[i+1] = num->data[i];
+    }
+    num->data[0] = 0;
+    num->num_of_digits++;
 }
 void __positive_difference(bigint* diff, bigint* a, bigint* b){
     bigint* larger;

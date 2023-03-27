@@ -651,34 +651,44 @@ boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
 boolean test_bigint_inc(double* amount_of_time){
     boolean retval = TRUE;
     const int num_of_tests = 1000;
+    int test_values[num_of_tests];
+    bigint* numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        test_values[i] = (int)rand()/2;
+        numbers[i] = create_from_int(test_values[i]);
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
-        //do the thing a bunch of times
+        bigint_inc(numbers[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(numbers[i]) != test_values[i] + 1)
+            retval = FALSE;
+        destroy(numbers[i]);
     }
-    return FALSE;//retval;
+    return retval;
 }                             
 boolean test_bigint_dec(double* amount_of_time){
     boolean retval = TRUE;
     const int num_of_tests = 1000;
+    int test_values[num_of_tests];
+    bigint* numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        test_values[i] = (int)rand()/2;
+        numbers[i] = create_from_int(test_values[i]);
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
-        //do the thing a bunch of times
+        bigint_dec(numbers[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(numbers[i]) != test_values[i] - 1)
+            retval = FALSE;
+        destroy(numbers[i]);
     }
-    return FALSE;//retval;
+    return retval;
 }                             
 boolean test_bigint_copy(double* amount_of_time){                 /* FIN */
     boolean retval = TRUE;
@@ -940,14 +950,7 @@ boolean test_everything(void){                                    /* FIN */
 }
 
 
-boolean compare_internal_functions(void){
-    //this is where we will benchmark and compare our internal library fuinctions to the speed of the glibc equivilants
-    return FALSE;
-}
-
-
 int main(){
-    compare_internal_functions();
     test_everything();
     return 0;
 }
