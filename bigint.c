@@ -107,37 +107,50 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){
     //we will be first using a nieve approach and then a variation of the Karatsuba fast multiplication algorithm
-    result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
     int possible_num_of_digits = a->num_of_digits + b->num_of_digits;
     __internal_make_correct_digit_allocation(result, possible_num_of_digits);
     //chose the shorter one for the outside
     //choose the longer one for the inside
     bigint* larger = (bigint_cmp_abs(a, b) > 0) ? a : b;
     bigint* smaller = (bigint_cmp_abs(a, b) > 0) ? b : a;
-    bigint* stepwise_addends[3];
-    for(int i = 0; i < 3; i++){
-        stepwise_addends[i] = create_zero();
-        __internal_make_correct_digit_allocation(stepwise_addends[i], larger->num_of_digits + 1);
-    }
+
+    bigint* stepwise_addend = create_zero();
+    bigint* intermediary = create_zero();
+    bigint* running_total = create_zero();
+    __internal_make_correct_digit_allocation(stepwise_addend, larger->num_of_digits + 1);
+    __internal_make_correct_digit_allocation(intermediary, larger->num_of_digits + 1);
+    __internal_make_correct_digit_allocation(running_total, larger->num_of_digits + 1);
+    
     for(int i = 0; i < smaller->num_of_digits; i++){
         byte carry_over = 0;
         for(int j = 0; j < larger->num_of_digits; j++){
-            stepwise_addends[0]->data[j] = smaller->data[i] * larger->data[j] + carry_over;
+            stepwise_addend->data[j] = smaller->data[i] * larger->data[j] + carry_over;
             carry_over = 0;
-            if(stepwise_addends[0]->data[j] > 9){
-                carry_over = stepwise_addends[0]->data[j] / 10;
-                stepwise_addends[0]->data[j] %= 10;
+            if(stepwise_addend->data[j] > 9){
+                carry_over = stepwise_addend->data[j] / 10;
+                stepwise_addend->data[j] %= 10;
             }
         }
         if(carry_over != 0){
-            stepwise_addends[0]->data[larger->num_of_digits] = carry_over;
-            stepwise_addends[0]->num_of_digits = larger->num_of_digits + 1;
+            stepwise_addend->data[larger->num_of_digits] = carry_over;
+            stepwise_addend->num_of_digits = larger->num_of_digits + 1;
         }
         else{
-            stepwise_addends[0]->num_of_digits = larger->num_of_digits;
+            stepwise_addend->num_of_digits = larger->num_of_digits;
         }
-        
+        //__obj_details(stepwise_addend, __LINE__, __FILE__);
+        //do the appropriate decimal place shift for this round
+        __fast_shift_10x(stepwise_addend, i);
+        bigint_add(intermediary, running_total, stepwise_addend);
+        bigint* switcheroo = running_total;
+        running_total = intermediary;
+        intermediary = switcheroo;
     }
+    bigint_copy(result, running_total);
+    result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    destroy(stepwise_addend);
+    destroy(intermediary);
+    destroy(running_total);
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
     bigint* retval;
@@ -296,11 +309,21 @@ void __add_abs(bigint* sum, bigint* a, bigint* b){
 }
 void __fast_shift_10(bigint* num){
     __internal_make_correct_digit_allocation(num, num->num_of_digits+1);
-    for(int i = num->num_of_digits - 1; i >= 0; i++){
+    for(int i = num->num_of_digits - 1; i >= 0; i--){
         num->data[i+1] = num->data[i];
     }
     num->data[0] = 0;
     num->num_of_digits++;
+}
+void __fast_shift_10x(bigint* num, unsigned int places_to_shift){
+    __internal_make_correct_digit_allocation(num, num->num_of_digits+places_to_shift);
+    for(int i = num->num_of_digits - 1; i >= 0; i--){
+        num->data[i+places_to_shift] = num->data[i];
+    }
+    for(int i = 0; i < places_to_shift; i++){
+        num->data[i] = 0;
+    }
+    num->num_of_digits += places_to_shift;
 }
 void __positive_difference(bigint* diff, bigint* a, bigint* b){
     bigint* larger;

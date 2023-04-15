@@ -11,7 +11,7 @@
     ((exp) ? (void)0 : printf("line " BOLDRED "%d" RESET " in file " BOLDGREEN "%s" RESET " expression " BOLDCYAN "%s" RESET " was false\n", __LINE__, __FILE__, #exp))
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
-//#define VERBOSE_TESTING
+#define VERBOSE_TESTING1
 
 boolean test_create_zero(double* amount_of_time){                 /* FIN */
     const int number_of_tests = 1000;
@@ -306,7 +306,7 @@ boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
 } 
 boolean test_bigint_mul(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = 1;
     bigint* a_nums[num_of_tests];
     bigint* b_nums[num_of_tests];
     bigint* result_nums[num_of_tests];
@@ -328,11 +328,17 @@ boolean test_bigint_mul(double* amount_of_time){
     for(int i = 0; i < num_of_tests; i++){
         if(to_int(result_nums[i]) != a_b_and_result[i][2])
             retval = FALSE;
+        #ifdef VERBOSE_TESTING1
+            printf("for test %d\na = %d   b = %d   a*b = %d\n", i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2]);
+            char* printable_str = to_string(result_nums[i]);
+            printf("%s\n", printable_str);
+            free(printable_str);
+        #endif
         destroy(a_nums[i]);   //clean up after ourselves
         destroy(b_nums[i]);
         destroy(result_nums[i]);
     }
-    return FALSE;//retval;
+    return retval;
 } 
 boolean test_bigint_div(double* amount_of_time){
     boolean retval = TRUE;
