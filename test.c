@@ -12,9 +12,11 @@
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
 #define VERBOSE_TESTING1
+#define META_TESTS_NUMBER 1000000
+
 
 boolean test_create_zero(double* amount_of_time){                 /* FIN */
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     boolean test_result = FALSE;
     bigint* test_num[number_of_tests];
     clock_t START = clock();
@@ -42,7 +44,7 @@ boolean test_create_zero(double* amount_of_time){                 /* FIN */
     return test_result;
 }				
 boolean test_create_one(double* amount_of_time){                  /* FIN */
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     boolean test_result = FALSE;
     bigint* test_num[number_of_tests];
     clock_t START = clock();
@@ -70,7 +72,7 @@ boolean test_create_one(double* amount_of_time){                  /* FIN */
     return test_result;
 }					
 boolean test_create_from_int(double* amount_of_time){             /* FIN */
-    const int size_of_test = 1000;
+    const int size_of_test = META_TESTS_NUMBER;
     boolean test_result = TRUE;
     bigint* test_num[size_of_test];
     int test_int[size_of_test];
@@ -115,7 +117,7 @@ boolean test_create_from_int(double* amount_of_time){             /* FIN */
 }
 boolean test_create_from_string(double* amount_of_time){          /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     char* test_cases[] = {"0", "1", "-1", "10", "123456", "-10000", "2130000000000000909", "-2130000000000000908"};
     int num_tests_per_loop = sizeof(test_cases)/sizeof(test_cases[0]);
     bigint* nums[num_of_tests];
@@ -139,7 +141,7 @@ boolean test_create_from_string(double* amount_of_time){          /* FIN */
 }
 boolean test_to_int(double* amount_of_time){                      /* FIN */
     boolean retval = TRUE;
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     int numbers_to_test_with[number_of_tests];
     bigint* bigint_numbers[number_of_tests];
     int numbers_to_compare[number_of_tests];
@@ -165,7 +167,7 @@ boolean test_to_int(double* amount_of_time){                      /* FIN */
     return retval;
 }					
 boolean test_to_string(double* amount_of_time){                   /* FIN */
-    const int size_of_test = 1000;
+    const int size_of_test = META_TESTS_NUMBER;
     boolean test_result = TRUE;
     bigint* test_num[size_of_test];
     int test_int[size_of_test];
@@ -205,7 +207,7 @@ boolean test_to_string(double* amount_of_time){                   /* FIN */
 }				
 boolean test_destroy(double* amount_of_time){                     /* FIN */
     boolean test_result =  FALSE;
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     bigint* a_num[number_of_tests];
     clock_t START = clock();
     for(int i = 0; i < number_of_tests; i++){
@@ -222,7 +224,7 @@ boolean test_destroy(double* amount_of_time){                     /* FIN */
 }				
 boolean test_bigint_add(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     int numbers_to_test_with[number_of_tests];
     bigint* bigint_numbers[number_of_tests];
     bigint* sums[number_of_tests];
@@ -264,7 +266,7 @@ boolean test_bigint_add(double* amount_of_time){                  /* FIN */
 } 
 boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int number_of_tests = 1000;
+    const int number_of_tests = META_TESTS_NUMBER;
     int numbers_to_test_with[number_of_tests];
     bigint* bigint_numbers[number_of_tests];
     bigint* diffs[number_of_tests];
@@ -304,9 +306,9 @@ boolean test_bigint_sub(double* amount_of_time){                  /* FIN */
     }
     return retval;
 } 
-boolean test_bigint_mul(double* amount_of_time){
+boolean test_bigint_mul(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* a_nums[num_of_tests];
     bigint* b_nums[num_of_tests];
     bigint* result_nums[num_of_tests];
@@ -328,10 +330,10 @@ boolean test_bigint_mul(double* amount_of_time){
     for(int i = 0; i < num_of_tests; i++){
         if(to_int(result_nums[i]) != a_b_and_result[i][2])
             retval = FALSE;
-        #ifdef VERBOSE_TESTING1
-            printf("for test %d\na = %d   b = %d   a*b = %d\n", i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2]);
+        #ifdef VERBOSE_TESTING
             char* printable_str = to_string(result_nums[i]);
-            printf("%s\n", printable_str);
+            printf("for test %d    a = %d   b = %d   a*b = %d   value calculated = %s\n", 
+            i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2], printable_str);
             free(printable_str);
         #endif
         destroy(a_nums[i]);   //clean up after ourselves
@@ -342,23 +344,43 @@ boolean test_bigint_mul(double* amount_of_time){
 } 
 boolean test_bigint_div(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
+    bigint* a_nums[num_of_tests];
+    bigint* b_nums[num_of_tests];
+    bigint* result_nums[num_of_tests];
+    int a_b_and_result[num_of_tests][3];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        a_b_and_result[i][0] = (int)sqrt(rand() / 2);
+        a_b_and_result[i][1] = (int)cbrt(rand() / 3);
+        a_b_and_result[i][2] = a_b_and_result[i][0] / a_b_and_result[i][1];
+        a_nums[i] = create_from_int(a_b_and_result[i][0]);
+        b_nums[i] = create_from_int(a_b_and_result[i][1]);
+        result_nums[i] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_div(result_nums[i], a_nums[i], b_nums[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(result_nums[i]) != a_b_and_result[i][2])
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING1
+            char* printable_str = to_string(result_nums[i]);
+            printf("for test %d    a = %d   b = %d   a/b = %d   value calculated = %s\n", 
+            i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2], printable_str);
+            free(printable_str);
+        #endif
+        destroy(a_nums[i]);   //clean up after ourselves
+        destroy(b_nums[i]);
+        destroy(result_nums[i]);
     }
-    return FALSE;//retval;
+    return retval;
 } 
 boolean test_bigint_mod(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -374,7 +396,7 @@ boolean test_bigint_mod(double* amount_of_time){
 } 
 boolean test_bigint_divmod(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -390,7 +412,7 @@ boolean test_bigint_divmod(double* amount_of_time){
 } 
 boolean test_bigint_pow(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -404,41 +426,67 @@ boolean test_bigint_pow(double* amount_of_time){
     }
     return FALSE;//retval;
 } 
-boolean test_bigint_sqr(double* amount_of_time){
+boolean test_bigint_sqr(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
+    unsigned int test_nums_and_results[num_of_tests][2];
+    bigint* test_bigints[num_of_tests][2];
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
+        test_nums_and_results[i][0] = (unsigned int)sqrt((double)rand()/3);
+        test_nums_and_results[i][1] = test_nums_and_results[i][0] * test_nums_and_results[i][0];
+        test_bigints[i][0] = create_from_int(test_nums_and_results[i][0]);
+        test_bigints[i][1] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_sqr(test_bigints[i][1], test_bigints[i][0]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(test_bigints[i][1]) != test_nums_and_results[i][1])
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING
+            //printout the stuff
+        #endif
+        destroy(test_bigints[i][0]);   //clean up after ourselves
+        destroy(test_bigints[i][1]);
     }
-    return FALSE;//retval;
+    return retval;
 }			  
-boolean test_bigint_cube(double* amount_of_time){
+boolean test_bigint_cube(double* amount_of_time){                 /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
+    unsigned int test_nums_and_results[num_of_tests][2];
+    bigint* test_bigints[num_of_tests][2];
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
+        test_nums_and_results[i][0] = (unsigned int)cbrt((double)rand()/3);
+        test_nums_and_results[i][1] = test_nums_and_results[i][0] * test_nums_and_results[i][0] * test_nums_and_results[i][0];
+        test_bigints[i][0] = create_from_int(test_nums_and_results[i][0]);
+        test_bigints[i][1] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_cube(test_bigints[i][1], test_bigints[i][0]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(test_bigints[i][1]) != test_nums_and_results[i][1])
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING
+            //printout the stuff
+        #endif
+        destroy(test_bigints[i][0]);   //clean up after ourselves
+        destroy(test_bigints[i][1]);
     }
-    return FALSE;//retval;
+    return retval;
 }		   	  
 boolean test_bigint_isqrt(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -454,7 +502,7 @@ boolean test_bigint_isqrt(double* amount_of_time){
 }          
 boolean test_bigint_factorial(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -470,7 +518,7 @@ boolean test_bigint_factorial(double* amount_of_time){
 }	  
 boolean test_bigint_n_choose_k(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -486,7 +534,7 @@ boolean test_bigint_n_choose_k(double* amount_of_time){
 } 
 boolean test_bigint_random(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
     }
@@ -502,7 +550,7 @@ boolean test_bigint_random(double* amount_of_time){
 }
 boolean test_bigint_cmp(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* nums[num_of_tests];
     int check_numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -531,7 +579,7 @@ boolean test_bigint_cmp(double* amount_of_time){                  /* FIN */
 }
 boolean test_bigint_cmp_abs(double* amount_of_time){              /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* nums[num_of_tests];
     int check_numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -560,7 +608,7 @@ boolean test_bigint_cmp_abs(double* amount_of_time){              /* FIN */
 }     	
 boolean test_int_cmp(double* amount_of_time){                     /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* nums[num_of_tests];
     int check_numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -595,7 +643,7 @@ boolean test_int_cmp(double* amount_of_time){                     /* FIN */
 }
 boolean test_int_cmp_abs(double* amount_of_time){                 /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* nums[num_of_tests];
     int check_numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -630,7 +678,7 @@ boolean test_int_cmp_abs(double* amount_of_time){                 /* FIN */
 }
 boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* nums[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
         if(i%3 == 0)
@@ -654,9 +702,9 @@ boolean test_bigint_is_zero(double* amount_of_time){              /* FIN */
     }
     return retval;
 }                      
-boolean test_bigint_inc(double* amount_of_time){
+boolean test_bigint_inc(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     int test_values[num_of_tests];
     bigint* numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -675,9 +723,9 @@ boolean test_bigint_inc(double* amount_of_time){
     }
     return retval;
 }                             
-boolean test_bigint_dec(double* amount_of_time){
+boolean test_bigint_dec(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     int test_values[num_of_tests];
     bigint* numbers[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){
@@ -698,7 +746,7 @@ boolean test_bigint_dec(double* amount_of_time){
 }                             
 boolean test_bigint_copy(double* amount_of_time){                 /* FIN */
     boolean retval = TRUE;
-    const int num_of_tests = 1000;
+    const int num_of_tests = META_TESTS_NUMBER;
     bigint* sources[num_of_tests];
     bigint* dests[num_of_tests];
     for(int i = 0; i < num_of_tests; i++){

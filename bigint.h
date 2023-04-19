@@ -102,6 +102,7 @@ boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_nee
 void __add_abs(bigint* sum, bigint* a, bigint* b); /* this adds the absolute values of the two numbers abs(a) + abs(b) */
 void __fast_shift_10(bigint* num); /* this effectively is a bit shift but for a base 10 number */
 void __fast_shift_10x(bigint* num, unsigned int places_to_shift); /* this effectively is a bit shift but for a base 10 number by an arbitrary amount*/
+bigint* __create_bigint_zero_of_size(unsigned int size); /* this just makes a bigint zero with size as the number of allocated digits */
 void __positive_difference(bigint* diff, bigint* a, bigint* b); /* this calculates abs(abs(a)-abs(b)) the positve difference between the two ie (20, -300) is 280 */
 void __obj_details(bigint* obj, int lineno, char* file); /* this is useful for debugging */
 void __internal_memcpy(void* dest, const void* source, int size); /* replaces the string.h implementation */

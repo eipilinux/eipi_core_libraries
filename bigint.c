@@ -105,7 +105,7 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
         result->sign = a->sign; //since (+a) - (-b) is positive and (-a) - (+b) is negative
     }
 }
-void bigint_mul(bigint* result, bigint* a, bigint* b){
+void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
     //we will be first using a nieve approach and then a variation of the Karatsuba fast multiplication algorithm
     int possible_num_of_digits = a->num_of_digits + b->num_of_digits;
     __internal_make_correct_digit_allocation(result, possible_num_of_digits);
@@ -114,12 +114,15 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){
     bigint* larger = (bigint_cmp_abs(a, b) > 0) ? a : b;
     bigint* smaller = (bigint_cmp_abs(a, b) > 0) ? b : a;
 
-    bigint* stepwise_addend = create_zero();
-    bigint* intermediary = create_zero();
-    bigint* running_total = create_zero();
-    __internal_make_correct_digit_allocation(stepwise_addend, larger->num_of_digits + 1);
-    __internal_make_correct_digit_allocation(intermediary, larger->num_of_digits + 1);
-    __internal_make_correct_digit_allocation(running_total, larger->num_of_digits + 1);
+    // bigint* stepwise_addend = create_zero();
+    // bigint* intermediary = create_zero();
+    // bigint* running_total = create_zero();
+    // __internal_make_correct_digit_allocation(stepwise_addend, possible_num_of_digits);
+    // __internal_make_correct_digit_allocation(intermediary, possible_num_of_digits);
+    // __internal_make_correct_digit_allocation(running_total, possible_num_of_digits);
+    bigint* stepwise_addend = __create_bigint_zero_of_size(possible_num_of_digits);
+    bigint* intermediary = __create_bigint_zero_of_size(possible_num_of_digits);
+    bigint* running_total = __create_bigint_zero_of_size(possible_num_of_digits);
     
     for(int i = 0; i < smaller->num_of_digits; i++){
         byte carry_over = 0;
@@ -153,8 +156,10 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){
     destroy(running_total);
 }
 void bigint_div(bigint* result, bigint* a, bigint* b){
-    bigint* retval;
-    
+    bigint* temporary_quotient = create_zero();
+    for(int i = 0; i < a->num_of_digits; i++){
+        
+    }
 }
 void bigint_mod(bigint* result, bigint* a, bigint* b){
     bigint* retval;
@@ -168,21 +173,33 @@ void bigint_pow(bigint* result, bigint* a, bigint* b){
     bigint* retval;
     
 }
-void bigint_sqr(bigint* result, bigint* a){
-    bigint* retval;
-    
+void bigint_sqr(bigint* result, bigint* a){             /* FIN */
+    bigint* internal_copy = create_zero();
+    bigint_copy(internal_copy, a);
+    bigint_mul(result, a, internal_copy);
+    destroy(internal_copy);
 }
-void bigint_cube(bigint* result, bigint* a){
-    bigint* retval;
-    
+void bigint_cube(bigint* result, bigint* a){            /* FIN */
+    bigint* internal_copy = create_zero();
+    bigint_sqr(internal_copy, a);
+    bigint_mul(result, a, internal_copy);
+    destroy(internal_copy);
 }
 void bigint_isqrt(bigint* result, bigint* a){
     bigint* retval;
     
 }
 void bigint_factorial(bigint* result, bigint* a){
-    bigint* retval;
-    
+    if(a->sign == NEGATIVE){
+        printf("error: unable to compute negative factorials\n");
+    }
+    else{
+        bigint* tmp = create_zero();
+        bigint_copy(tmp, a);
+        while(int_cmp_abs(tmp, 1) > 0){
+
+        }
+    }
 }
 void bigint_n_choose_k(bigint* result, bigint* n, bigint* k){
     bigint* retval;
@@ -324,6 +341,16 @@ void __fast_shift_10x(bigint* num, unsigned int places_to_shift){
         num->data[i] = 0;
     }
     num->num_of_digits += places_to_shift;
+}
+bigint* __create_bigint_zero_of_size(unsigned int size){
+    int realsz = (size > 0) ? size : 2;
+    bigint* retval = malloc(sizeof(bigint));
+    retval->num_of_digits = 1;
+    retval->num_allocated = realsz;
+    retval->data = malloc(retval->num_allocated*sizeof(byte));
+    retval->sign = POSITIVE;
+    retval->data[0] = 0;
+    return retval;
 }
 void __positive_difference(bigint* diff, bigint* a, bigint* b){
     bigint* larger;
