@@ -11,8 +11,16 @@
     ((exp) ? (void)0 : printf("line " BOLDRED "%d" RESET " in file " BOLDGREEN "%s" RESET " expression " BOLDCYAN "%s" RESET " was false\n", __LINE__, __FILE__, #exp))
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
-#define VERBOSE_TESTING1
+//#define VERBOSE_TESTING
 #define META_TESTS_NUMBER 1000000
+
+int factorial(int n)  
+{  
+  if (n == 0)  
+    return 1;  
+  else  
+    return(n * factorial(n-1));  
+}
 
 
 boolean test_create_zero(double* amount_of_time){                 /* FIN */
@@ -366,7 +374,7 @@ boolean test_bigint_div(double* amount_of_time){
     for(int i = 0; i < num_of_tests; i++){
         if(to_int(result_nums[i]) != a_b_and_result[i][2])
             retval = FALSE;
-        #ifdef VERBOSE_TESTING1
+        #ifdef VERBOSE_TESTING
             char* printable_str = to_string(result_nums[i]);
             printf("for test %d    a = %d   b = %d   a/b = %d   value calculated = %s\n", 
             i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2], printable_str);
@@ -500,21 +508,37 @@ boolean test_bigint_isqrt(double* amount_of_time){
     }
     return FALSE;//retval;
 }          
-boolean test_bigint_factorial(double* amount_of_time){
+boolean test_bigint_factorial(double* amount_of_time){            /* FIN */
     boolean retval = TRUE;
     const int num_of_tests = META_TESTS_NUMBER;
+    bigint* a_nums[num_of_tests];
+    bigint* result_nums[num_of_tests];
+    int a_b_and_result[num_of_tests][2];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        a_b_and_result[i][0] = rand() % 12;
+        a_b_and_result[i][1] = factorial(a_b_and_result[i][0]);
+        a_nums[i] = create_from_int(a_b_and_result[i][0]);
+        result_nums[i] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_factorial(result_nums[i], a_nums[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(result_nums[i]) != a_b_and_result[i][1])
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING
+            char* printable_str = to_string(result_nums[i]);
+            printf("for test %d    a = %d   a! = %d   value calculated = %s\n", 
+            i+1, a_b_and_result[i][0], a_b_and_result[i][1], printable_str);
+            free(printable_str);
+        #endif
+        destroy(a_nums[i]);   //clean up after ourselves
+        destroy(result_nums[i]);
     }
-    return FALSE;//retval;
+    return retval;
 }	  
 boolean test_bigint_n_choose_k(double* amount_of_time){
     boolean retval = TRUE;

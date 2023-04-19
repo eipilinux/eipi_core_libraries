@@ -158,7 +158,7 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
 void bigint_div(bigint* result, bigint* a, bigint* b){
     bigint* temporary_quotient = create_zero();
     for(int i = 0; i < a->num_of_digits; i++){
-        
+
     }
 }
 void bigint_mod(bigint* result, bigint* a, bigint* b){
@@ -189,15 +189,33 @@ void bigint_isqrt(bigint* result, bigint* a){
     bigint* retval;
     
 }
-void bigint_factorial(bigint* result, bigint* a){
+void bigint_factorial(bigint* result, bigint* a){       /* FIN */
     if(a->sign == NEGATIVE){
         printf("error: unable to compute negative factorials\n");
     }
     else{
-        bigint* tmp = create_zero();
-        bigint_copy(tmp, a);
-        while(int_cmp_abs(tmp, 1) > 0){
+        if(int_cmp(a, 0) == 0 || int_cmp(a, 1) == 0){
+            result->data[0] = 1;
+            result->num_of_digits = 1;
+            result->sign = POSITIVE;
+        }
+        else{
+            bigint* temp_result = create_zero();
+            bigint* intermediary = create_one();
+            bigint* start = create_zero();
+            bigint_copy(start, a);
 
+            while(int_cmp_abs(start, 1) > 0){
+                bigint_mul(temp_result, intermediary, start);
+                bigint* floater = intermediary;
+                intermediary = temp_result;
+                temp_result = floater;
+                bigint_dec(start);
+            }
+            bigint_copy(result, intermediary);
+            destroy(intermediary);
+            destroy(temp_result);
+            destroy(start);
         }
     }
 }
