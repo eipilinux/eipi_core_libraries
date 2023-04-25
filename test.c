@@ -11,7 +11,7 @@
     ((exp) ? (void)0 : printf("line " BOLDRED "%d" RESET " in file " BOLDGREEN "%s" RESET " expression " BOLDCYAN "%s" RESET " was false\n", __LINE__, __FILE__, #exp))
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
-//#define VERBOSE_TESTING
+#define VERBOSE_TESTING1
 #define META_TESTS_NUMBER 1000000
 
 int factorial(int n)  
@@ -350,7 +350,7 @@ boolean test_bigint_mul(double* amount_of_time){                  /* FIN */
     }
     return retval;
 } 
-boolean test_bigint_div(double* amount_of_time){
+boolean test_bigint_div(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
     const int num_of_tests = META_TESTS_NUMBER;
     bigint* a_nums[num_of_tests];
@@ -358,8 +358,8 @@ boolean test_bigint_div(double* amount_of_time){
     bigint* result_nums[num_of_tests];
     int a_b_and_result[num_of_tests][3];
     for(int i = 0; i < num_of_tests; i++){
-        a_b_and_result[i][0] = (int)sqrt(rand() / 2);
-        a_b_and_result[i][1] = (int)cbrt(rand() / 3);
+        a_b_and_result[i][0] = (int)sqrt(rand() / 2) % 50000;
+        a_b_and_result[i][1] = (int)cbrt(rand() / 3) % 20000 + 1;
         a_b_and_result[i][2] = a_b_and_result[i][0] / a_b_and_result[i][1];
         a_nums[i] = create_from_int(a_b_and_result[i][0]);
         b_nums[i] = create_from_int(a_b_and_result[i][1]);
@@ -386,21 +386,41 @@ boolean test_bigint_div(double* amount_of_time){
     }
     return retval;
 } 
-boolean test_bigint_mod(double* amount_of_time){
+boolean test_bigint_mod(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
     const int num_of_tests = META_TESTS_NUMBER;
+    bigint* a_nums[num_of_tests];
+    bigint* b_nums[num_of_tests];
+    bigint* result_nums[num_of_tests];
+    int a_b_and_result[num_of_tests][3];
     for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
+        a_b_and_result[i][0] = (int)sqrt(rand() / 2) % 50000;
+        a_b_and_result[i][1] = (int)cbrt(rand() / 3) % 20000 + 1;
+        a_b_and_result[i][2] = a_b_and_result[i][0] % a_b_and_result[i][1];
+        a_nums[i] = create_from_int(a_b_and_result[i][0]);
+        b_nums[i] = create_from_int(a_b_and_result[i][1]);
+        result_nums[i] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_mod(result_nums[i], a_nums[i], b_nums[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        if(to_int(result_nums[i]) != a_b_and_result[i][2])
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING
+            char* printable_str = to_string(result_nums[i]);
+            printf("for test %d    a = %d   b = %d   a mod b = %d   value calculated = %s\n", 
+            i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2], printable_str);
+            free(printable_str);
+        #endif
+        destroy(a_nums[i]);   //clean up after ourselves
+        destroy(b_nums[i]);
+        destroy(result_nums[i]);
     }
-    return FALSE;//retval;
+    return retval;
 } 
 boolean test_bigint_divmod(double* amount_of_time){
     boolean retval = TRUE;
@@ -1030,5 +1050,18 @@ boolean test_everything(void){                                    /* FIN */
 
 int main(){
     test_everything();
+
+    // bigint* one_hunderd_beans = create_from_int(7850);
+    // bigint* output_beans = create_zero();
+    // clock_t START = clock();
+    // bigint_factorial(output_beans, one_hunderd_beans);
+    // double amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    // printf("it took: %g msec to do the thing\n", amount_of_time);
+    // char* output_string = to_string(output_beans);
+    // printf("the result is: \n%s\n", output_string);
+    // destroy(output_beans);
+    // destroy(one_hunderd_beans);
+    // free(output_string);
+
     return 0;
 }

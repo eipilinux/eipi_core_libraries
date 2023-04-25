@@ -155,23 +155,117 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
     destroy(intermediary);
     destroy(running_total);
 }
-void bigint_div(bigint* result, bigint* a, bigint* b){
-    bigint* temporary_quotient = create_zero();
-    for(int i = 0; i < a->num_of_digits; i++){
-
+void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
+    if(bigint_is_zero(b)){
+        printf("error: cannot divide by zero\n");
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        bigint* working_copy_of_this = create_zero();
+        bigint* switcheroo = create_zero();
+        bigint* tmp;
+        bigint_copy(working_copy_of_this, a);
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+        while(int_cmp(working_copy_of_this, 0) >= 0){
+            bigint_sub(switcheroo, working_copy_of_this, b);
+            tmp = working_copy_of_this;
+            working_copy_of_this = switcheroo;
+            switcheroo = tmp;
+            bigint_inc(result);
+        }
+        bigint_dec(result);
+        destroy(switcheroo);
+        destroy(working_copy_of_this);
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
     }
 }
-void bigint_mod(bigint* result, bigint* a, bigint* b){
-    bigint* retval;
-    
+void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
+    if(bigint_is_zero(b)){
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        bigint* working_copy_of_this = create_zero();
+        bigint* switcheroo = create_zero();
+        bigint* tmp;
+        bigint_copy(working_copy_of_this, a);
+        while(int_cmp(working_copy_of_this, 0) >= 0){
+            bigint_sub(switcheroo, working_copy_of_this, b);
+            if(switcheroo->sign == NEGATIVE){
+                break;
+            }
+            tmp = working_copy_of_this;
+            working_copy_of_this = switcheroo;
+            switcheroo = tmp;
+        }
+        bigint_copy(result, working_copy_of_this);
+        destroy(switcheroo);
+        destroy(working_copy_of_this);
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
 }
 void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){
-    bigint* retval;
-    
+    if(bigint_is_zero(b)){
+        printf("error: cannot divide by zero\n");
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        bigint* working_copy_of_this = create_zero();
+        bigint* switcheroo = create_zero();
+        bigint* tmp;
+        bigint_copy(working_copy_of_this, a);
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+        while(int_cmp(working_copy_of_this, 0) >= 0){
+            bigint_sub(switcheroo, working_copy_of_this, b);
+            tmp = working_copy_of_this;
+            working_copy_of_this = switcheroo;
+            switcheroo = tmp;
+            bigint_inc(result);
+        }
+        bigint_dec(result);
+        destroy(switcheroo);
+        destroy(working_copy_of_this);
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
 }
 void bigint_pow(bigint* result, bigint* a, bigint* b){
-    bigint* retval;
-    
+    if(bigint_is_zero(b)){
+        result->data[0] = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        if(bigint_is_zero(a)){
+            result->data[0] = 0;
+            result->sign = POSITIVE;
+        }
+        else{
+            bigint* work_in_progress = create_one();
+            bigint* working_copy_b = create_zero();
+            bigint* placeholder = create_zero();
+            bigint* tmp;
+            bigint_copy(working_copy_b, b);
+            while(int_cmp(working_copy_b, 0) > 0){
+                bigint_mul(placeholder, work_in_progress, a);
+                tmp = placeholder;
+                placeholder = work_in_progress;
+                work_in_progress = tmp;
+                bigint_dec(working_copy_b);
+            }
+            bigint_copy(result, work_in_progress);
+            destroy(work_in_progress);
+            destroy(working_copy_b);
+            destroy(placeholder);
+        }
+    }
 }
 void bigint_sqr(bigint* result, bigint* a){             /* FIN */
     bigint* internal_copy = create_zero();
