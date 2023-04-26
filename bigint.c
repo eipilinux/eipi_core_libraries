@@ -162,6 +162,9 @@ void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
         result->num_of_digits = 1;
         result->sign = POSITIVE;
     }
+    else if(int_cmp(b, 1) == 0){
+        bigint_copy(result, a);
+    }
     else{
         bigint* working_copy_of_this = create_zero();
         bigint* switcheroo = create_zero();
@@ -172,19 +175,20 @@ void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
         result->sign = POSITIVE;
         while(int_cmp(working_copy_of_this, 0) >= 0){
             bigint_sub(switcheroo, working_copy_of_this, b);
+            if(switcheroo->sign == NEGATIVE)
+                break;
             tmp = working_copy_of_this;
             working_copy_of_this = switcheroo;
             switcheroo = tmp;
             bigint_inc(result);
         }
-        bigint_dec(result);
         destroy(switcheroo);
         destroy(working_copy_of_this);
         result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
     }
 }
 void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
-    if(bigint_is_zero(b)){
+    if(bigint_is_zero(b) || bigint_is_zero(a)){
         result->data[0] = 0;
         result->num_of_digits = 1;
         result->sign = POSITIVE;
@@ -206,10 +210,10 @@ void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
         bigint_copy(result, working_copy_of_this);
         destroy(switcheroo);
         destroy(working_copy_of_this);
-        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+        result->sign = POSITIVE;
     }
 }
-void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){
+void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){  /* FIN */
     if(bigint_is_zero(b)){
         printf("error: cannot divide by zero\n");
         result->data[0] = 0;
@@ -226,18 +230,21 @@ void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){
         result->sign = POSITIVE;
         while(int_cmp(working_copy_of_this, 0) >= 0){
             bigint_sub(switcheroo, working_copy_of_this, b);
+            if(switcheroo->sign == NEGATIVE){
+                break;
+            }
             tmp = working_copy_of_this;
             working_copy_of_this = switcheroo;
             switcheroo = tmp;
             bigint_inc(result);
         }
-        bigint_dec(result);
+        bigint_copy(rem, working_copy_of_this);
         destroy(switcheroo);
         destroy(working_copy_of_this);
         result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
     }
 }
-void bigint_pow(bigint* result, bigint* a, bigint* b){
+void bigint_pow(bigint* result, bigint* a, bigint* b){  /* FIN */
     if(bigint_is_zero(b)){
         result->data[0] = 1;
         result->sign = POSITIVE;
@@ -280,8 +287,18 @@ void bigint_cube(bigint* result, bigint* a){            /* FIN */
     destroy(internal_copy);
 }
 void bigint_isqrt(bigint* result, bigint* a){
-    bigint* retval;
-    
+    a=2   //2nd root ie sqrt
+    b=input_number   //base ie a
+    n=1   //initial guess
+    c=0   //current iteration (this is a changing variable)
+    r=50   //total number of iterations to run
+    while (c<r) 
+    {
+        m = n-(((n^a)-b)/(a*b))  //Newton's algorithm
+        n=m
+        c++;
+        trace(m + "  <--guess   ...   iteration-->  " + c)
+    }
 }
 void bigint_factorial(bigint* result, bigint* a){       /* FIN */
     if(a->sign == NEGATIVE){
