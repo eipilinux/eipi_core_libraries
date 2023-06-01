@@ -331,8 +331,28 @@ void bigint_factorial(bigint* result, bigint* a){       /* FIN */
     }
 }
 void bigint_n_choose_k(bigint* result, bigint* n, bigint* k){
-    bigint* retval;
-    
+    bigint* retval = create_zero();
+
+    bigint* n_factorial = create_zero();
+    bigint_factorial(n_factorial, n);
+
+    bigint* k_factorial = create_zero();
+    bigint_factorial(k_factorial, k);
+
+    bigint* n_minus_k = create_zero();
+    bigint_sub(n_minus_k, n, k);
+    bigint* n_minus_k_factorial = create_zero();
+    bigint_factorial(n_minus_k_factorial, n_minus_k);
+    destroy(n_minus_k);
+
+    bigint* denom = create_zero();
+    bigint_mul(denom, n_minus_k_factorial, k_factorial);
+    destroy(k_factorial);
+    destroy(n_minus_k_factorial);
+
+    bigint_div(retval, n_factorial, denom);
+    destroy(denom);
+    destroy(n_factorial);
 }
 void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound){
     bigint* retval;
