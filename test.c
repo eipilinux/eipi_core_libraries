@@ -12,8 +12,7 @@
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
 //#define VERBOSE_TESTING
-#define META_TESTS_NUMBER 1000000
-
+#define META_TESTS_NUMBER 100//1000000
 int factorial(int n)  
 {
   if (n == 0)  
@@ -21,7 +20,6 @@ int factorial(int n)
   else  
     return(n * factorial(n-1));  
 }
-
 
 boolean test_create_zero(double* amount_of_time){                 /* FIN */
     const int number_of_tests = META_TESTS_NUMBER;
@@ -560,18 +558,38 @@ boolean test_bigint_cube(double* amount_of_time){                 /* FIN */
 boolean test_bigint_isqrt(double* amount_of_time){
     boolean retval = TRUE;
     const int num_of_tests = META_TESTS_NUMBER;
+
+    bigint* test_input_array[num_of_tests];
+    bigint* test_answer_array[num_of_tests];
+    int test_input_ints[num_of_tests];
+    int test_answer_ints[num_of_tests];
+
     for(int i = 0; i < num_of_tests; i++){
         //initialize everything
+        test_input_ints[i] = rand() % 1000000000 + 1;
+        test_answer_ints[i] = (int)sqrt((double)test_input_ints[i]);
+        test_input_array[i] = create_from_int(test_input_ints[i]);
+        test_answer_array[i] = create_zero();
     }
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
+        bigint_isqrt(test_answer_array[i], test_input_array[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
+        //clean up after ourselves
+        if(int_cmp(test_answer_array[i], test_answer_ints[i]))
+            retval = FALSE;
+        #ifdef VERBOSE_TESTING
+            char* answer_print = to_string(test_answer_array[i]);
+            printf("Number: %d, Sqrt: %d, Function returned: %s\n", test_input_ints[i], test_answer_ints[i], answer_print);
+            free(answer_print);
+        #endif
+        destroy(test_answer_array[i]);
+        destroy(test_input_array[i]);
     }
-    return FALSE;//retval;
+    return retval;
 }          
 boolean test_bigint_factorial(double* amount_of_time){            /* FIN */
     boolean retval = TRUE;

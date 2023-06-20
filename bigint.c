@@ -287,17 +287,96 @@ void bigint_cube(bigint* result, bigint* a){            /* FIN */
     destroy(internal_copy);
 }
 void bigint_isqrt(bigint* result, bigint* a){
-    a=2   //2nd root ie sqrt
-    b=input_number   //base ie a
-    n=1   //initial guess
-    c=0   //current iteration (this is a changing variable)
-    r=50   //total number of iterations to run
-    while (c<r) 
-    {
-        m = n-(((n^a)-b)/(a*b))  //Newton's algorithm
-        n=m
-        c++;
-        trace(m + "  <--guess   ...   iteration-->  " + c)
+    if(bigint_is_zero(a)){
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        /*
+            initial guess is scaled to match the approximate size of the input number based on the number of digits in the input
+            ie for a 1 digit input the guess is 3 since the largest 1 digit number is 9 and sqrt(9) <= 3
+            for 2 digit number the guess is 10 since (int)sqrt(99) <= 10
+            for 3 digit number the guess is 32 since (int)sqrt(999) <= 32
+            for 4 digit number the guess is 100 since (int)sqrt(9999) <= 100
+            for 5 digit number the guess is 320 since (int)sqrt(99999) <= 320
+            for 6 digit number the guess is 1000 since (int)sqrt(999999) <= 1000
+            etc
+
+            in addition we can do a leading digit refinement by noting that
+            ie for a 1 digit input the guess is 3 since the largest 1 digit number is 9 and sqrt(9) <= 3
+            for 2 digit number the guess is 10 since (int)sqrt(99) <= 10 and if the leading digit is <5 we change it to 7
+            for 3 digit number the guess is 32 since (int)sqrt(999) <= 32
+            for 4 digit number the guess is 100 since (int)sqrt(9,999) <= 100 and if the leading digit is <5 we change it to 71
+            for 5 digit number the guess is 320 since (int)sqrt(99,999) <= 320
+            for 6 digit number the guess is 1000 since (int)sqrt(999,999) <= 1000 and if the leading digit is <5 we change it to 710
+            for 7 digit number the guess is 3200 since (int)sqrt(9,999,999) <= 3200 
+            for 8 digit number the guess is 10,000 since (int)sqrt(99,999,999) <= 10,000
+            for 9 digit number the guess is 32,000 since (int)sqrt(999,999,999) <= 32,000 
+            for 10 digit number the guess is 100,000 since (int)sqrt(9,999,999,999) <= 100,000
+            for 11 digit number the guess is 320,000 since (int)sqrt(99,999,999,999) <= 320,000 
+        */
+        bigint* initial_guess_n;
+        if(a->num_of_digits == 1){
+            initial_guess_n = create_from_int(3);
+        }
+        else{
+            if(a->num_of_digits % 2 == 0){
+            initial_guess_n = create_one();
+            int k = a->num_of_digits/2;
+            __fast_shift_10x(initial_guess_n, k);
+            }
+            else{
+                initial_guess_n = create_from_int(32);
+                int k = (a->num_of_digits - 1)/2;
+                __fast_shift_10x(initial_guess_n, k-1);
+            }
+        }
+
+
+        /*
+        char* guess_print = to_string(initial_guess_n);
+        char* input_print = to_string(a);
+        printf("number was: %s, initial guess was: %s\n", input_print, guess_print);
+        free(input_print);
+        free(guess_print);
+        */
+        
+        bigint* cycle = create_one();
+        bigint* intermediate = create_one();
+        bigint* intermediate2 = create_one();
+        bigint* big_2 = create_from_int(2);
+        int max_num_iterations_to_run = 50;
+        // char* input_print = to_string(a);
+        // printf("Number: %s\n", input_print);
+        // free(input_print);
+        int i;
+        for(i = 0; i < max_num_iterations_to_run; i++) 
+        {
+            //this basically is next_guess = (initial_guess + a/initial_guess)/2
+            bigint_div(intermediate, a, initial_guess_n);
+            bigint_add(intermediate2, initial_guess_n, intermediate);
+            bigint_div(cycle, intermediate2, big_2);
+
+            //if we already converged or (overshot) then quit
+            if(bigint_cmp(initial_guess_n, cycle) == 0 || (bigint_cmp(initial_guess_n, cycle) < 0 && i > 0))
+                break;
+
+            bigint* switcheroo = initial_guess_n;
+            initial_guess_n = cycle;
+            cycle = switcheroo;
+            // char* printout = to_string(initial_guess_n);
+            // printf("    %s  <--guess   ...   iteration-->  %d\n", printout, i);
+            // free(printout);
+        }
+        printf("we did %d iterations\n", i);
+        //printf("\n");
+        bigint_copy(result, initial_guess_n);
+        destroy(initial_guess_n);
+        destroy(cycle);
+        destroy(intermediate);
+        destroy(intermediate2);
+        destroy(big_2);
     }
 }
 void bigint_factorial(bigint* result, bigint* a){       /* FIN */
@@ -491,6 +570,14 @@ void __fast_shift_10x(bigint* num, unsigned int places_to_shift){
     }
     num->num_of_digits += places_to_shift;
 }
+
+void __fast_divide_10(bigint* num){
+
+}
+void __fast_divide_10x(bigint* num){
+
+}
+
 bigint* __create_bigint_zero_of_size(unsigned int size){
     int realsz = (size > 0) ? size : 2;
     bigint* retval = malloc(sizeof(bigint));
@@ -631,4 +718,9 @@ int __fast_pow_10(int pow){
     return (pow == 0) ? 1 : (pow == 1) ? 10 : (pow == 2) ? 100 : (pow == 3) ? 1000 :
     (pow == 4) ? 10000 : (pow == 5) ? 100000 : (pow == 6) ? 1000000 : (pow == 7) ? 10000000 : 
     (pow == 8) ? 100000000 : 1000000000;
+}
+void __fast_div2(bigint* result, bigint* num){
+    bigint* big_5 = create_from_int(5);
+    bigint_mul(result, num, big_5);
+    __fast_divide_10(result);
 }
