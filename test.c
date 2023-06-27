@@ -12,7 +12,7 @@
 #define INFO(msg) \
     printf("line: %d in file: %s %s", __LINE__, __FILE__, #msg);
 //#define VERBOSE_TESTING
-#define META_TESTS_NUMBER 100//1000000
+#define META_TESTS_NUMBER 1000//1000000
 int factorial(int n)  
 {
   if (n == 0)  
@@ -1113,7 +1113,17 @@ boolean test_everything(void){                                    /* FIN */
 
 int main(){
     test_everything();
-
+    // bigint* one_hunderd_beans = create_from_int(2121);
+    // char* output_string_before = to_string(one_hunderd_beans);
+    // bigint* output_beans = create_zero();
+    // __fast_div_2(output_beans, one_hunderd_beans);
+    // char* output_string_after = to_string(output_beans);
+    // printf("the result is: \n%s\n and then: %s\n", output_string_before, output_string_after);
+    // destroy(one_hunderd_beans);
+    // destroy(output_beans);
+    // free(output_string_before);
+    // free(output_string_after);
+    // printf("the result is: \n%s\n", output_string);
     // bigint* one_hunderd_beans = create_from_int(7850);
     // bigint* output_beans = create_zero();
     // clock_t START = clock();

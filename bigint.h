@@ -102,8 +102,8 @@ boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_nee
 void __add_abs(bigint* sum, bigint* a, bigint* b); /* this adds the absolute values of the two numbers abs(a) + abs(b) */
 void __fast_shift_10(bigint* num); /* this effectively is a bit shift but for a base 10 number */
 void __fast_shift_10x(bigint* num, unsigned int places_to_shift); /* this effectively is a bit shift but for a base 10 number by an arbitrary amount */
-void __fast_divide_10(bigint* num); /* this effectively is a bit shift division but for a base 10 number */
-void __fast_divide_10x(bigint* num); /* this effectively is a bit shift division but for a base 10 number by an arbitrary amount */
+void __fast_div_10(bigint* num); /* this effectively is a bit shift division but for a base 10 number */
+void __fast_div_10x(bigint* num, unsigned int places_to_remove); /* this effectively is a bit shift division but for a base 10 number by an arbitrary amount */
 bigint* __create_bigint_zero_of_size(unsigned int size); /* this just makes a bigint zero with size as the number of allocated digits */
 void __positive_difference(bigint* diff, bigint* a, bigint* b); /* this calculates abs(abs(a)-abs(b)) the positve difference between the two ie (20, -300) is 280 */
 void __obj_details(bigint* obj, int lineno, char* file); /* this is useful for debugging */
@@ -112,5 +112,5 @@ int __strcmp(const char *s1, const char *s2);	/* this is just a copy of the stan
 size_t __strlen(const char *str);	/* this is just a copy of the standard string.h implementation of strlen since that is one of the only function from that library that we utilize */
 int __fast_int_log10(int input);	/* this is to replace the standard log10() function from math.h and significantly improve performance */
 int __fast_pow_10(int pow);			/* this is to eliminate the need for the pow() function from math.h it is also much faster as it only handles 9 exponents and 1 base */
-void __fast_div2(bigint* result, bigint* num); /* this is an internal way to very quickly divide by 2 it is integrated into the user facing bigint_div function it */
+void __fast_div_2(bigint* result, bigint* num); /* this is an internal way to very quickly divide by 2 it is integrated into the user facing bigint_div function it */
 #endif

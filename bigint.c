@@ -155,7 +155,8 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
     destroy(intermediary);
     destroy(running_total);
 }
-void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
+
+void __shitty_internal_div(bigint* result, bigint* a, bigint* b){  /* FIN */
     if(bigint_is_zero(b)){
         printf("error: cannot divide by zero\n");
         result->data[0] = 0;
@@ -164,6 +165,9 @@ void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
     }
     else if(int_cmp(b, 1) == 0){
         bigint_copy(result, a);
+    }
+    else if(int_cmp(b, 2) == 0){
+        __fast_div_2(result, a);
     }
     else{
         bigint* working_copy_of_this = create_zero();
@@ -185,6 +189,29 @@ void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
         destroy(switcheroo);
         destroy(working_copy_of_this);
         result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
+}
+
+
+void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
+    if(bigint_is_zero(b)){
+        printf("error: cannot divide by zero\n");
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else if(int_cmp(b, 1) == 0){
+        bigint_copy(result, a);
+    }
+    else if(int_cmp(b, 2) == 0){
+        __fast_div_2(result, a);
+    }
+    else{
+        bigint* total = __create_bigint_zero_of_size(a->num_of_digits);
+        bigint* working_dividend = __create_bigint_zero_of_size(a->num_of_digits);
+        working_dividend->data[0] = a->data[a->num_of_digits - 1]; // get the most significant bit of the dividend
+        // divide this bit by the divisor 
+        //(this is where we cna iprove things by skipping all the inevitible 0's created by looping until we get something larger than the divisor)
     }
 }
 void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
@@ -214,8 +241,23 @@ void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
     }
 }
 void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){  /* FIN */
+    int test_condition = bigint_cmp(a, b);
     if(bigint_is_zero(b)){
         printf("error: cannot divide by zero\n");
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else if(test_condition == 0){
+        result->data[0] = 1;
+        result->num_of_digits = 1;
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+        rem->data[0] = 0;
+        rem->num_of_digits = 1;
+        rem->sign = POSITIVE;
+    }
+    else if(test_condition < 0){
+        bigint_copy(rem, a);
         result->data[0] = 0;
         result->num_of_digits = 1;
         result->sign = POSITIVE;
@@ -345,7 +387,7 @@ void bigint_isqrt(bigint* result, bigint* a){
         bigint* cycle = create_one();
         bigint* intermediate = create_one();
         bigint* intermediate2 = create_one();
-        bigint* big_2 = create_from_int(2);
+        //bigint* big_2 = create_from_int(2);
         int max_num_iterations_to_run = 50;
         // char* input_print = to_string(a);
         // printf("Number: %s\n", input_print);
@@ -356,7 +398,8 @@ void bigint_isqrt(bigint* result, bigint* a){
             //this basically is next_guess = (initial_guess + a/initial_guess)/2
             bigint_div(intermediate, a, initial_guess_n);
             bigint_add(intermediate2, initial_guess_n, intermediate);
-            bigint_div(cycle, intermediate2, big_2);
+            //bigint_div(cycle, intermediate2, big_2);
+            __fast_div_2(cycle, intermediate2);
 
             //if we already converged or (overshot) then quit
             if(bigint_cmp(initial_guess_n, cycle) == 0 || (bigint_cmp(initial_guess_n, cycle) < 0 && i > 0))
@@ -369,14 +412,14 @@ void bigint_isqrt(bigint* result, bigint* a){
             // printf("    %s  <--guess   ...   iteration-->  %d\n", printout, i);
             // free(printout);
         }
-        printf("we did %d iterations\n", i);
+        //printf("we did %d iterations\n", i);
         //printf("\n");
         bigint_copy(result, initial_guess_n);
         destroy(initial_guess_n);
         destroy(cycle);
         destroy(intermediate);
         destroy(intermediate2);
-        destroy(big_2);
+        //destroy(big_2);
     }
 }
 void bigint_factorial(bigint* result, bigint* a){       /* FIN */
@@ -570,14 +613,32 @@ void __fast_shift_10x(bigint* num, unsigned int places_to_shift){
     }
     num->num_of_digits += places_to_shift;
 }
-
-void __fast_divide_10(bigint* num){
-
+void __fast_div_10(bigint* num){
+    if(num->num_of_digits == 1){
+        num->data[0] = 0;
+        num->num_of_digits = 1;
+        num->sign = POSITIVE;
+    }
+    else{
+        for(int i = 0; i < num->num_of_digits - 1; i++){
+            num->data[i] = num->data[i+1];
+        }
+        num->num_of_digits--;
+    }
 }
-void __fast_divide_10x(bigint* num){
-
+void __fast_div_10x(bigint* num, unsigned int places_to_remove){
+    if(num->num_of_digits <= places_to_remove){
+        num->data[0] = 0;
+        num->num_of_digits = 1;
+        num->sign = POSITIVE;
+    }
+    else{
+        for(int i = 0; i < num->num_of_digits - places_to_remove; i++){
+            num->data[i] = num->data[i+places_to_remove];
+        }
+        num->num_of_digits -= places_to_remove;
+    }
 }
-
 bigint* __create_bigint_zero_of_size(unsigned int size){
     int realsz = (size > 0) ? size : 2;
     bigint* retval = malloc(sizeof(bigint));
@@ -719,8 +780,8 @@ int __fast_pow_10(int pow){
     (pow == 4) ? 10000 : (pow == 5) ? 100000 : (pow == 6) ? 1000000 : (pow == 7) ? 10000000 : 
     (pow == 8) ? 100000000 : 1000000000;
 }
-void __fast_div2(bigint* result, bigint* num){
+void __fast_div_2(bigint* result, bigint* num){
     bigint* big_5 = create_from_int(5);
     bigint_mul(result, num, big_5);
-    __fast_divide_10(result);
+    __fast_div_10(result);
 }
