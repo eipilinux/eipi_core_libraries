@@ -53,19 +53,21 @@ typedef struct bigint{
 }bigint;
 
 //============================================================================
-// User Function Initialization and Destruction Prototypes
+// Basic Interface Setup & User Functions
 //============================================================================
 
 bigint* create_zero(void);					/* creates a new bigint and sets it equal to 0 */
 bigint* create_one(void);					/* creates a new bigint and sets it equal to 1 */
 bigint* create_from_int(int input);			/* creates a new bigint and sets it equal to the int value provided */
 bigint* create_from_string(char* input);	/* creates a new bigint and sets it equal to the string provided */
+/* string stuff */
 int to_int(bigint* num);					/* this simply truncates to whatever fits in an int so be warned */
 char* to_string(bigint* num);				/* returns a string of the integer */
+/* memory de-allocation function */
 boolean destroy(bigint* num);				/* this frees the object and sets it to null */
 
 //============================================================================
-// User Function Basic Math Prototypes
+// Mathematical Function Prototypes
 //============================================================================
 /* Basic math operations */
 void bigint_add(bigint* result, bigint* a, bigint* b); /* result = a + b */
@@ -113,4 +115,5 @@ size_t __strlen(const char *str);	/* this is just a copy of the standard string.
 int __fast_int_log10(int input);	/* this is to replace the standard log10() function from math.h and significantly improve performance */
 int __fast_pow_10(int pow);			/* this is to eliminate the need for the pow() function from math.h it is also much faster as it only handles 9 exponents and 1 base */
 void __fast_div_2(bigint* result, bigint* num); /* this is an internal way to very quickly divide by 2 it is integrated into the user facing bigint_div function it */
+void __smallnum_internal_divmod(bigint* result, bigint* rem, bigint* a, bigint* b);
 #endif

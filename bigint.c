@@ -1,5 +1,8 @@
 #include "bigint.h"
 
+//============================================================================
+// Basic Interface Setup & User Functions
+//============================================================================
 bigint* create_zero(void){                              /* FIN */
     bigint* retval = malloc(sizeof(bigint));
     retval->num_of_digits = 1;
@@ -50,6 +53,8 @@ bigint* create_from_string(char* input){                /* FIN */
     }
     return retval;
 }
+
+/* string stuff */
 int to_int(bigint* num){                                /* FIN */
     if(num->num_of_digits > 10){
         printf("Error number is out of range!\n");
@@ -71,6 +76,8 @@ char* to_string(bigint* num){                           /* FIN */
     retstr[strlength - 1] = '\0';
     return retstr;
 }
+
+/* memory de-allocation function */
 boolean destroy(bigint* num){                           /* FIN */
     if(!num)
         return TRUE;
@@ -79,6 +86,11 @@ boolean destroy(bigint* num){                           /* FIN */
     free(num);
     return TRUE;
 }
+
+//============================================================================
+// Mathematical Function Prototypes
+//============================================================================
+/* Basic math operations */
 void bigint_add(bigint* result, bigint* a, bigint* b){  /* FIN */
     if(a->sign == b->sign){
         __add_abs(result, a, b);
@@ -155,135 +167,99 @@ void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
     destroy(intermediary);
     destroy(running_total);
 }
-
-void __shitty_internal_div(bigint* result, bigint* a, bigint* b){  /* FIN */
-    if(bigint_is_zero(b)){
-        printf("error: cannot divide by zero\n");
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-    }
-    else if(int_cmp(b, 1) == 0){
-        bigint_copy(result, a);
-    }
-    else if(int_cmp(b, 2) == 0){
-        __fast_div_2(result, a);
-    }
-    else{
-        bigint* working_copy_of_this = create_zero();
-        bigint* switcheroo = create_zero();
-        bigint* tmp;
-        bigint_copy(working_copy_of_this, a);
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-        while(int_cmp(working_copy_of_this, 0) >= 0){
-            bigint_sub(switcheroo, working_copy_of_this, b);
-            if(switcheroo->sign == NEGATIVE)
-                break;
-            tmp = working_copy_of_this;
-            working_copy_of_this = switcheroo;
-            switcheroo = tmp;
-            bigint_inc(result);
-        }
-        destroy(switcheroo);
-        destroy(working_copy_of_this);
-        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
-    }
-}
-
-
 void bigint_div(bigint* result, bigint* a, bigint* b){  /* FIN */
-    if(bigint_is_zero(b)){
-        printf("error: cannot divide by zero\n");
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-    }
-    else if(int_cmp(b, 1) == 0){
-        bigint_copy(result, a);
-    }
-    else if(int_cmp(b, 2) == 0){
-        __fast_div_2(result, a);
-    }
-    else{
-        bigint* total = __create_bigint_zero_of_size(a->num_of_digits);
-        bigint* working_dividend = __create_bigint_zero_of_size(a->num_of_digits);
-        working_dividend->data[0] = a->data[a->num_of_digits - 1]; // get the most significant bit of the dividend
-        // divide this bit by the divisor 
-        //(this is where we cna iprove things by skipping all the inevitible 0's created by looping until we get something larger than the divisor)
-    }
+    bigint* remainder = create_zero();
+    bigint_divmod(result, remainder, a, b);
+    destroy(remainder);
 }
 void bigint_mod(bigint* result, bigint* a, bigint* b){  /* FIN */
-    if(bigint_is_zero(b) || bigint_is_zero(a)){
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-    }
-    else{
-        bigint* working_copy_of_this = create_zero();
-        bigint* switcheroo = create_zero();
-        bigint* tmp;
-        bigint_copy(working_copy_of_this, a);
-        while(int_cmp(working_copy_of_this, 0) >= 0){
-            bigint_sub(switcheroo, working_copy_of_this, b);
-            if(switcheroo->sign == NEGATIVE){
-                break;
-            }
-            tmp = working_copy_of_this;
-            working_copy_of_this = switcheroo;
-            switcheroo = tmp;
-        }
-        bigint_copy(result, working_copy_of_this);
-        destroy(switcheroo);
-        destroy(working_copy_of_this);
-        result->sign = POSITIVE;
-    }
+    bigint* dividend = create_zero();
+    bigint_divmod(dividend, result, a, b);
+    destroy(dividend);
 }
 void bigint_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){  /* FIN */
-    int test_condition = bigint_cmp(a, b);
-    if(bigint_is_zero(b)){
-        printf("error: cannot divide by zero\n");
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-    }
-    else if(test_condition == 0){
-        result->data[0] = 1;
-        result->num_of_digits = 1;
-        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    if(bigint_is_zero(b) || bigint_is_zero(a)){
         rem->data[0] = 0;
         rem->num_of_digits = 1;
         rem->sign = POSITIVE;
-    }
-    else if(test_condition < 0){
-        bigint_copy(rem, a);
+
+        if(bigint_is_zero(b))
+            printf("error: cannot divide by zero\n");
         result->data[0] = 0;
         result->num_of_digits = 1;
         result->sign = POSITIVE;
+    }
+    else if(bigint_cmp_abs(a, b) < 0){
+        bigint_copy(rem, a);
+
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else if(bigint_cmp_abs(a, b) == 0){
+        rem->data[0] = 0;
+        rem->num_of_digits = 1;
+        rem->sign = POSITIVE;
+
+        result->data[0] = 1;
+        result->num_of_digits = 1;
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
+    else if(int_cmp_abs(b, 1) == 0){
+        rem->data[0] = 0;
+        rem->num_of_digits = 1;
+        rem->sign = POSITIVE;
+
+        bigint_copy(result, a);
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
+    else if(int_cmp_abs(b, 2) == 0){
+        rem->data[0] = a->data[0] % 2;
+        rem->num_of_digits = 1;
+        rem->sign = POSITIVE;
+
+        __fast_div_2(result, a);
+        result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
     }
     else{
-        bigint* working_copy_of_this = create_zero();
-        bigint* switcheroo = create_zero();
-        bigint* tmp;
-        bigint_copy(working_copy_of_this, a);
-        result->data[0] = 0;
-        result->num_of_digits = 1;
-        result->sign = POSITIVE;
-        while(int_cmp(working_copy_of_this, 0) >= 0){
-            bigint_sub(switcheroo, working_copy_of_this, b);
-            if(switcheroo->sign == NEGATIVE){
-                break;
+        bigint* total = __create_bigint_zero_of_size(a->num_of_digits);
+        total->num_of_digits = 0;
+        bigint* step = __create_bigint_zero_of_size(a->num_of_digits);
+        bigint* working_dividend = __create_bigint_zero_of_size(a->num_of_digits);
+        bigint* mod = __create_bigint_zero_of_size(a->num_of_digits);
+        boolean first_digit_trip = FALSE;
+        for(int i = a->num_of_digits - 1; i >= 0; i--){
+            __fast_shift_10(working_dividend);
+            working_dividend->data[0] = a->data[i];
+            __smallnum_internal_divmod(step, mod, working_dividend, b);
+            //this is where we can improve things by skipping all the inevitible 0's created by looping until we get something larger than the divisor
+            if(int_cmp(step, 0) > 0){
+                total->num_of_digits++;
+                total->data[total->num_of_digits - 1] = step->data[0];
+                bigint* tmp = working_dividend;
+                working_dividend = mod;
+                mod = tmp;
+                first_digit_trip = TRUE;
             }
-            tmp = working_copy_of_this;
-            working_copy_of_this = switcheroo;
-            switcheroo = tmp;
-            bigint_inc(result);
+            else if(first_digit_trip){
+                total->num_of_digits++;
+                total->data[total->num_of_digits - 1] = step->data[0];
+            }
         }
-        bigint_copy(rem, working_copy_of_this);
-        destroy(switcheroo);
-        destroy(working_copy_of_this);
+        bigint_copy(rem, working_dividend);
+        //__obj_details(total, __LINE__, __FILE__);
+        __internal_make_correct_digit_allocation(result, total->num_of_digits);
+        result->num_of_digits = total->num_of_digits;
         result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+
+        for(int i = 0; i < total->num_of_digits; i++){
+            result->data[i] = total->data[total->num_of_digits - i - 1];
+        }
+
+        destroy(total);
+        destroy(step);
+        destroy(working_dividend);
+        destroy(mod);
     }
 }
 void bigint_pow(bigint* result, bigint* a, bigint* b){  /* FIN */
@@ -328,7 +304,7 @@ void bigint_cube(bigint* result, bigint* a){            /* FIN */
     bigint_mul(result, a, internal_copy);
     destroy(internal_copy);
 }
-void bigint_isqrt(bigint* result, bigint* a){
+void bigint_isqrt(bigint* result, bigint* a){           /* FIN */
     if(bigint_is_zero(a)){
         result->data[0] = 0;
         result->num_of_digits = 1;
@@ -412,8 +388,8 @@ void bigint_isqrt(bigint* result, bigint* a){
             // printf("    %s  <--guess   ...   iteration-->  %d\n", printout, i);
             // free(printout);
         }
-        //printf("we did %d iterations\n", i);
-        //printf("\n");
+        // printf("we did %d iterations\n", i);
+        // printf("\n");
         bigint_copy(result, initial_guess_n);
         destroy(initial_guess_n);
         destroy(cycle);
@@ -422,6 +398,8 @@ void bigint_isqrt(bigint* result, bigint* a){
         //destroy(big_2);
     }
 }
+
+/* More complex math operations */
 void bigint_factorial(bigint* result, bigint* a){       /* FIN */
     if(a->sign == NEGATIVE){
         printf("error: unable to compute negative factorials\n");
@@ -480,6 +458,8 @@ void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound){
     bigint* retval;
 
 }
+
+/* Special operators and comparison */
 int bigint_cmp(bigint* a, bigint* b){              /* FIN */
     if(a->sign != b->sign)
         return (a->sign > b->sign) ? 1 : -1;
@@ -565,12 +545,16 @@ void bigint_dec(bigint* n){                        /* FIN */
         }
     }
 }
-void bigint_copy(bigint* dst, bigint* src){
+void bigint_copy(bigint* dst, bigint* src){        /* FIN */
     __internal_make_correct_digit_allocation(dst, src->num_of_digits);
     dst->sign = src->sign;
     dst->num_of_digits = src->num_of_digits;
     __internal_memcpy(dst->data, src->data, dst->num_of_digits); //memcpy is very fast, unfortunetly it uses the string.h lib which i would prefer not to use
 }
+
+//============================================================================
+// Internal Library Functions
+//============================================================================
 boolean __internal_make_correct_digit_allocation(bigint* num, int num_digits_needed){
     if(num->num_allocated >= num_digits_needed)
         return TRUE;
@@ -596,22 +580,26 @@ void __add_abs(bigint* sum, bigint* a, bigint* b){
     sum->sign = POSITIVE;
 }
 void __fast_shift_10(bigint* num){
-    __internal_make_correct_digit_allocation(num, num->num_of_digits+1);
-    for(int i = num->num_of_digits - 1; i >= 0; i--){
-        num->data[i+1] = num->data[i];
+    if(!bigint_is_zero(num)){
+        __internal_make_correct_digit_allocation(num, num->num_of_digits+1);
+        for(int i = num->num_of_digits - 1; i >= 0; i--){
+            num->data[i+1] = num->data[i];
+        }
+        num->data[0] = 0;
+        num->num_of_digits++;
     }
-    num->data[0] = 0;
-    num->num_of_digits++;
 }
 void __fast_shift_10x(bigint* num, unsigned int places_to_shift){
-    __internal_make_correct_digit_allocation(num, num->num_of_digits+places_to_shift);
-    for(int i = num->num_of_digits - 1; i >= 0; i--){
-        num->data[i+places_to_shift] = num->data[i];
+    if(!bigint_is_zero(num)){
+        __internal_make_correct_digit_allocation(num, num->num_of_digits+places_to_shift);
+        for(int i = num->num_of_digits - 1; i >= 0; i--){
+            num->data[i+places_to_shift] = num->data[i];
+        }
+        for(int i = 0; i < places_to_shift; i++){
+            num->data[i] = 0;
+        }
+        num->num_of_digits += places_to_shift;
     }
-    for(int i = 0; i < places_to_shift; i++){
-        num->data[i] = 0;
-    }
-    num->num_of_digits += places_to_shift;
 }
 void __fast_div_10(bigint* num){
     if(num->num_of_digits == 1){
@@ -785,3 +773,55 @@ void __fast_div_2(bigint* result, bigint* num){
     bigint_mul(result, num, big_5);
     __fast_div_10(result);
 }
+void __smallnum_internal_divmod(bigint* result, bigint* rem, bigint* a, bigint* b){
+    int test_condition = bigint_cmp_abs(a, b);
+    if(bigint_is_zero(b)){
+        printf("error: cannot divide by zero\n");
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else if(test_condition == 0){
+        result->data[0] = 1;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;//result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+        rem->data[0] = 0;
+        rem->num_of_digits = 1;
+        rem->sign = POSITIVE;
+    }
+    else if(test_condition < 0){
+        bigint_copy(rem, a);
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        bigint* working_copy_of_this = create_zero();
+        bigint* switcheroo = create_zero();
+        bigint* tmp;
+        bigint* abs_b = create_zero();
+        bigint_copy(abs_b, b);
+        abs_b->sign = POSITIVE;
+        bigint_copy(working_copy_of_this, a);
+        working_copy_of_this->sign = POSITIVE;
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+        while(int_cmp(working_copy_of_this, 0) >= 0){
+            bigint_sub(switcheroo, working_copy_of_this, abs_b);
+            if(switcheroo->sign == NEGATIVE){
+                break;
+            }
+            tmp = working_copy_of_this;
+            working_copy_of_this = switcheroo;
+            switcheroo = tmp;
+            bigint_inc(result);
+        }
+        bigint_copy(rem, working_copy_of_this);
+        destroy(switcheroo);
+        destroy(working_copy_of_this);
+        destroy(abs_b);
+        result->sign = POSITIVE;//result->sign = (a->sign == b->sign) ? POSITIVE : NEGATIVE;
+    }
+}
+// end of file
