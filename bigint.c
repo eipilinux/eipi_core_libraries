@@ -35,7 +35,7 @@ bigint* create_from_int(int input){                     /* FIN */
     }while(stepwise_remainder > 0);
     return retval;
 }
-bigint* create_from_string(char* input){                /* FIN */
+bigint* create_from_string(const char* input){          /* FIN */
     if(__strcmp(input,"0") == 0)
         return create_zero();
     if(__strcmp(input,"1") == 0)
@@ -118,7 +118,7 @@ void bigint_sub(bigint* result, bigint* a, bigint* b){  /* FIN */
     }
 }
 void bigint_mul(bigint* result, bigint* a, bigint* b){  /* FIN */
-    //we will be first using a nieve approach and then a variation of the Karatsuba fast multiplication algorithm
+    //we will be first using a naive approach and then a variation of the Karatsuba fast multiplication algorithm
     int possible_num_of_digits = a->num_of_digits + b->num_of_digits;
     __internal_make_correct_digit_allocation(result, possible_num_of_digits);
     //chose the shorter one for the outside
@@ -400,6 +400,12 @@ void bigint_isqrt(bigint* result, bigint* a){           /* FIN */
 }
 
 /* More complex math operations */
+void next_prime(bigint* result, bigint* a){
+
+}
+boolean is_prime(bigint* a){
+    return FALSE;
+}
 void bigint_factorial(bigint* result, bigint* a){       /* FIN */
     if(a->sign == NEGATIVE){
         printf("error: unable to compute negative factorials\n");
@@ -430,33 +436,49 @@ void bigint_factorial(bigint* result, bigint* a){       /* FIN */
         }
     }
 }
-void bigint_n_choose_k(bigint* result, bigint* n, bigint* k){
-    bigint* retval = create_zero();
+void bigint_n_choose_k(bigint* result, bigint* n, bigint* k){   /* FIN */
+    if(bigint_cmp_abs(n, k) < 0){
+        result->data[0] = 0;
+        result->num_of_digits = 1;
+        result->sign = POSITIVE;
+    }
+    else{
+        bigint* n_factorial = create_zero();
+        bigint_factorial(n_factorial, n);
 
-    bigint* n_factorial = create_zero();
-    bigint_factorial(n_factorial, n);
+        bigint* k_factorial = create_zero();
+        bigint_factorial(k_factorial, k);
 
-    bigint* k_factorial = create_zero();
-    bigint_factorial(k_factorial, k);
+        bigint* n_minus_k = create_zero();
+        bigint_sub(n_minus_k, n, k);
+        bigint* n_minus_k_factorial = create_zero();
+        bigint_factorial(n_minus_k_factorial, n_minus_k);
+        destroy(n_minus_k);
 
-    bigint* n_minus_k = create_zero();
-    bigint_sub(n_minus_k, n, k);
-    bigint* n_minus_k_factorial = create_zero();
-    bigint_factorial(n_minus_k_factorial, n_minus_k);
-    destroy(n_minus_k);
+        bigint* denom = create_zero();
+        bigint_mul(denom, n_minus_k_factorial, k_factorial);
+        destroy(k_factorial);
+        destroy(n_minus_k_factorial);
 
-    bigint* denom = create_zero();
-    bigint_mul(denom, n_minus_k_factorial, k_factorial);
-    destroy(k_factorial);
-    destroy(n_minus_k_factorial);
-
-    bigint_div(retval, n_factorial, denom);
-    destroy(denom);
-    destroy(n_factorial);
+        bigint_div(result, n_factorial, denom);
+        destroy(denom);
+        destroy(n_factorial);
+    }
 }
-void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound){
-    bigint* retval;
+void bigint_random_seed(void){               /* FIN */
+    RANDOM_NUMBER_GENERATOR_SEED = (RANDOM_NUMBER_GENERATOR_SEED+((unsigned int)clock()*(unsigned int)clock()))%1000000;
+}
+void bigint_random(bigint* result){
+    bigint* max_size = create_from_string(MAX_RANDOM_NUMBER_SIZE);
+    bigint* X_initial = create_from_int((int)RANDOM_NUMBER_GENERATOR_SEED);
+    bigint* retval = create_zero();
+    bigint_mod(retval, X_initial, max_size);
+    bigint_copy(result, retval);
+    destroy(X_initial);
+    destroy(max_size);
+    destroy(retval);
 
+    //printf("%d\n",RANDOM_NUMBER_GENERATOR_SEED);
 }
 
 /* Special operators and comparison */

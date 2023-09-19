@@ -2,7 +2,8 @@
 #define BIGINT
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
+#include <time.h>
+//#include <string.h> 
 //#include <math.h>
 //#include <limits.h>
 //========================================================================================================================================================
@@ -30,6 +31,10 @@
 #define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
+static const char* MAX_RANDOM_NUMBER_SIZE = "1000";
+static unsigned int RANDOM_NUMBER_GENERATOR_SEED = 622336;
+
 
 typedef char boolean;
 typedef unsigned char byte;		/* we could use uint_8t from stdint.h for better cross platform uniformity */
@@ -59,7 +64,7 @@ typedef struct bigint{
 bigint* create_zero(void);					/* creates a new bigint and sets it equal to 0 */
 bigint* create_one(void);					/* creates a new bigint and sets it equal to 1 */
 bigint* create_from_int(int input);			/* creates a new bigint and sets it equal to the int value provided */
-bigint* create_from_string(char* input);	/* creates a new bigint and sets it equal to the string provided */
+bigint* create_from_string(const char* input);	/* creates a new bigint and sets it equal to the string provided */
 /* string stuff */
 int to_int(bigint* num);					/* this simply truncates to whatever fits in an int so be warned */
 char* to_string(bigint* num);				/* returns a string of the integer */
@@ -82,9 +87,12 @@ void bigint_cube(bigint* result, bigint* a);		   /* result = a^3 ie 2^3 = 8 */
 void bigint_isqrt(bigint* result, bigint* a);          /* Integer square root ie isqrt(5) => 2 */
 
 /* More complex math operations */
+void next_prime(bigint* result, bigint* a);			   /* returns the next prime number above the input a */
+boolean is_prime(bigint* a);						   /* returns true if a is prime and false otherwise */
 void bigint_factorial(bigint* result, bigint* a);	   /* result = a! */
 void bigint_n_choose_k(bigint* result, bigint* n, bigint* k); /* result = n choose k = n!/(k!(n-k)!) */
-void bigint_random(bigint* result, bigint* lower_bound, bigint* upper_bound); /* generate a cryptographically secure psuedo random number in the range specifid */
+void bigint_random_seed(void); /* seeds the random number generator so that the random number sequences are unique */
+void bigint_random(bigint* result); /* generate a cryptographically secure psuedo random number between 0 and MAX_RANDOM_NUMBER_SIZE */
 
 /* Special operators and comparison */
 int bigint_cmp(bigint* a, bigint* b);               	/* Compare: returns 1 if a > b, 0 if a == b, and -1 if a < b */

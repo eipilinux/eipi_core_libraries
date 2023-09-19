@@ -15,7 +15,7 @@
 #define META_TESTS_NUMBER 10//1000000
 int factorial(int n)  
 {
-  if (n == 0)  
+  if (n <= 0)  
     return 1;  
   else  
     return(n * factorial(n-1));  
@@ -623,7 +623,7 @@ boolean test_bigint_factorial(double* amount_of_time){            /* FIN */
     }
     return retval;
 }	  
-boolean test_bigint_n_choose_k(double* amount_of_time){
+boolean test_bigint_n_choose_k(double* amount_of_time){           /* FIN */
     
     /*
         n choose k = n! / ( k! * (n-k)! )
@@ -638,7 +638,7 @@ boolean test_bigint_n_choose_k(double* amount_of_time){
     for(int i = 0; i < num_of_tests; i++){
         a_b_and_result[i][0] = (int)rand() % 10;
         a_b_and_result[i][1] = (int)cbrt(rand()) % 5;
-        a_b_and_result[i][2] = a_b_and_result[i][0] - a_b_and_result[i][1];//factorial(a_b_and_result[i][0]) / (factorial(a_b_and_result[i][1]) * factorial(a_b_and_result[i][0] - a_b_and_result[i][1]));
+        a_b_and_result[i][2] = factorial(a_b_and_result[i][0]) / (factorial(a_b_and_result[i][1]) * factorial(a_b_and_result[i][0] - a_b_and_result[i][1]));
         a_nums[i] = create_from_int(a_b_and_result[i][0]);
         b_nums[i] = create_from_int(a_b_and_result[i][1]);
         result_nums[i] = create_zero();
@@ -646,18 +646,18 @@ boolean test_bigint_n_choose_k(double* amount_of_time){
     clock_t START = clock();
     for(int i = 0; i < num_of_tests; i++){
         //do the thing a bunch of times
-        //bigint_div(result_nums[i], a_nums[i], b_nums[i]);
+        bigint_n_choose_k(result_nums[i], a_nums[i], b_nums[i]);
     }
     *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
     for(int i = 0; i < num_of_tests; i++){
         if(to_int(result_nums[i]) != a_b_and_result[i][2])
             retval = FALSE;
-        //#ifdef VERBOSE_TESTING
+        #ifdef VERBOSE_TESTING
             char* printable_str = to_string(result_nums[i]);
             printf("for test %d    a = %d   b = %d   a/b = %d   value calculated = %s\n", 
             i+1, a_b_and_result[i][0], a_b_and_result[i][1], a_b_and_result[i][2], printable_str);
             free(printable_str);
-        //#endif
+        #endif
         destroy(a_nums[i]);   //clean up after ourselves
         destroy(b_nums[i]);
         destroy(result_nums[i]);
@@ -666,19 +666,25 @@ boolean test_bigint_n_choose_k(double* amount_of_time){
 } 
 boolean test_bigint_random(double* amount_of_time){
     boolean retval = TRUE;
-    const int num_of_tests = META_TESTS_NUMBER;
-    for(int i = 0; i < num_of_tests; i++){
-        //initialize everything
-    }
-    clock_t START = clock();
-    for(int i = 0; i < num_of_tests; i++){
-        //do the thing a bunch of times
-    }
-    *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
-    for(int i = 0; i < num_of_tests; i++){
-        //destroy(nums[i]);   //clean up after ourselves
-    }
-    return FALSE;//retval;
+    // const int num_of_tests = META_TESTS_NUMBER;
+    // for(int i = 0; i < num_of_tests; i++){
+    //     //initialize everything
+    // }
+    // clock_t START = clock();
+    // for(int i = 0; i < num_of_tests; i++){
+    //     //do the thing a bunch of times
+    // }
+    // *amount_of_time = 1000.0 * ((double)(clock() - (START)) / CLOCKS_PER_SEC);
+    // for(int i = 0; i < num_of_tests; i++){
+    //     //destroy(nums[i]);   //clean up after ourselves
+    // }
+    bigint* whaaa = create_zero();
+    bigint_random(whaaa);
+    char* ahhh = to_string(whaaa);
+    //printf("%s\n", ahhh);
+    free(ahhh);
+    destroy(whaaa);
+    return retval;
 }
 boolean test_bigint_cmp(double* amount_of_time){                  /* FIN */
     boolean retval = TRUE;
@@ -1137,23 +1143,7 @@ boolean test_everything(void){                                    /* FIN */
 
 
 int main(){
+    bigint_random_seed();
     test_everything();
-    bigint* one_hunderd_beans = create_from_int(61707);
-    bigint* divisor = create_from_int(-201);
-    bigint* output_beans = create_zero();
-    bigint* remainder = create_zero();
-    bigint_divmod(output_beans, remainder, one_hunderd_beans, divisor);
-    char* report_total = to_string(output_beans);
-    char* a_str = to_string(one_hunderd_beans);
-    char* b_str = to_string(divisor);
-    printf("\n\nA was: %s, and B was: %s\n\n", a_str, b_str);
-    printf("%s divided by %s is %s\n\n", a_str, b_str, report_total);
-    free(a_str);
-    free(b_str);
-    free(report_total);
-    destroy(one_hunderd_beans);
-    destroy(remainder);
-    destroy(divisor);
-    destroy(output_beans);
     return 0;
 }
